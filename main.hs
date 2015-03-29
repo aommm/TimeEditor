@@ -15,8 +15,10 @@ import qualified Network.Wreq.Session as S
 
 -- Parsing
 import Text.XML.HXT.Core hiding (trace)
-import Text.HandsomeSoup
 import qualified Data.Tree.Class as T
+import Text.HandsomeSoup
+
+import Data.List.Split (splitOn)
 
 import Debug.Trace
 
@@ -24,11 +26,10 @@ import Debug.Trace
 -- Types
 
 -- A room booking
-data Booking = Booking StartTime EndTime Room
+data Booking = Booking {startTime :: Time, endTime :: Time, room :: Room}
     deriving (Eq, Show)
-type StartTime = UTCTime
-type EndTime   = UTCTime
-type Room      = String
+type Time = UTCTime
+type Room = String
 
 -- Login credentials
 type Credentials = (Username,Password)
@@ -73,11 +74,10 @@ getBookings sess = do
 -- Parsing
 
 parseBookings :: String -> IO [Booking]
-parseBookings _htmls = do
-    -- print htmls
-    htmls <- readFile "exampleInput.html"
-    
+parseBookings htmls = do
     let html  = htmls `seq` parseHtml htmls
+    -- htmls <- readFile "exampleInput.html"
+
     bookings <- runX $ html >>> parseBookings'
     print $ bookings
     print $ length bookings
@@ -89,28 +89,33 @@ parseBookings _htmls = do
 
 -- TODO: parse into booking objects later. Persons for now
 --parseBookings' :: ArrowXml a => a XmlTree [Booking]
-parseBookings' :: IOSArrow XmlTree [Person]
+parseBookings' :: IOSArrow XmlTree [Booking]
 parseBookings' =    configSysVars (withTrace 1 : [])
                     >>> css "#texttable"
                     -- >>> withTraceLevel 4 (traceDoc "resulting document")
                     >>> getChildren >>> hasName "table"
+                    -- >>> processChildren (this >>. drop 1)
+                    >>> removeAllWhiteSpace -- remove nodes: XText "\n\t\t"
+                    >>> processChildrenList (drop 2) -- remove first two rows
+                    >>> printDoc
+                    >>> processChildren (this)
                     -- >>> withTraceLevel 4 (traceDoc "resulting document")
                      -- >>> arr (\t -> Left ([],t)) >. (show.length)
                     >>> arr (\t -> Left ([],t))
                     >>> parseAndRemoves 
                     >>> arr (\r -> fromRight r )
 
-
--- Dummy data type
-data Person = Person String String
-    deriving Show
-
+printDoc = withTraceLevel 4 (traceDoc "resulting document")
+-- printVal :: IOSArrow XmlTree XmlTree 
+-- printVal = traceValue 1 show
+-- printMsg :: String -> IOSArrow XmlTree XmlTree 
+printMsg = traceMsg 1
 --  arr :: (b -> c) -> a b c 
 -- (&&&) :: a b c -> a b c' -> a b (c, c') 
 -- (***) :: a b c -> a b' c' -> a (b, b') (c, c')
 -- ifA   :: a b c -> a b d -> a b d -> a b d
 
-parseAndRemoves :: IOSArrow (Either ([Person],XmlTree) [Person]) (Either ([Person],XmlTree) [Person])
+parseAndRemoves :: IOSArrow (Either ([Booking],XmlTree) [Booking]) (Either ([Booking],XmlTree) [Booking])
 parseAndRemoves = 
     traceMsg 1 "parseAndRemoves" >>>
     ifA (isA isLeft) trueArr falseArr
@@ -119,7 +124,6 @@ parseAndRemoves =
                    >>> arr fromLeft
                    >>> traceMsg 1 "trueArr: 2"
                    >>> ((arr snd
-                        >>> removeAllWhiteSpace -- remove nodes: XText "\n\t\t"
                         >>> (parseRowX &&& parseRowTree)
                         >>> traceMsg 1 "rowx and tree done")
                    &&& (
@@ -146,23 +150,48 @@ parseAndRemoves =
 -- (>.)  :: a b c -> ([c] -> d)   -> a b d
 -- getChildren :: (Tree t, ArrowTree a) => a (t b) (t b)
 
-parseRowX :: IOSArrow XmlTree (Maybe Person)
+parseRowX :: IOSArrow XmlTree (Maybe Booking)
 parseRowX = 
             traceMsg 1 "parseRowX"
-            >>> ((this          -- is a table
-                >>> getChildren -- get rows
-                >>. take 1
-                )
-                >>> multi (hasName "td") -- get all <td>s text
-                >>> deep getText
-                )
-            >. makePerson
-            >>> traceMsg 1 "parseRowX: made person"
+            >>> ((getChildren >>. take 1) >>> parseDateTr)
+                &&&
+                ((getChildren >>. take 1 . drop 1) >>> parseRowTr)
+            >>> arr (uncurry setBookingDay)
+            >>> traceMsg 1 "parseRowX: made booking"
             >>> traceValue 1 show
 
 
-    where makePerson [n,a] = Just $ Person n a
-          makePerson _     = Nothing
+-- big TODO
+parseDateTr :: IOSArrow XmlTree (Maybe UTCTime)
+parseDateTr = 
+  -- withTraceLevel 4 (traceDoc "resulting doc")
+  dropChildren 1 >>> takeChildren 1
+  >>> deep getText
+  -- >>> traceMsg 1 "parseDateTr. Date string:"
+  -- >>> traceValue 1 show
+  >>> arr myDateParser
+
+parseRowTr :: IOSArrow XmlTree (Maybe Booking)
+parseRowTr = (dropChildren 1 -- remove first <td>
+             >>> deep getText) 
+             >. makeBooking
+    where makeBooking [timeTd,roomTd,textTd] = do 
+                                                (start,end) <- myTimeParser timeTd
+                                                room <- myRoomParser roomTd
+                                                return $ Booking start end room
+          makeBooking _ = Nothing
+
+
+-- | Sets the day of the 'booking' to be the day in the 'date'.
+setBookingDay :: Maybe UTCTime -> Maybe Booking -> Maybe Booking
+setBookingDay date booking = do
+  b <- booking -- throw away date, but get time
+  d <- date
+  let newStart = (startTime b) {utctDay = utctDay d}
+  let newEnd   = (endTime   b) {utctDay = utctDay d}
+  return b {startTime=newStart, endTime = newEnd}
+
+
 
 
 -- getNode :: Tree t => a (t b) b
@@ -175,12 +204,34 @@ parseRowX =
 -- (&&&) :: Arrow a => a b c -> a b c' -> a b (c, c')
 -- (>>>) :: Control.Category.Category cat => cat a b -> cat b c -> cat a c
 
+
+-- TODO next: make this change the tree in appropriate ways
+-- Quite hard?
+-- Skip <tr> with date info, throw away <tr> with time info.
+-- If no other left in this <tr> with date info, remove it
 parseRowTree :: IOSArrow XmlTree XmlTree
 parseRowTree = traceMsg 1 "parseRowTree"
+               >>> withTraceLevel 4 (traceDoc "resulting doc")
+               >>>
+               (getNode -- get tree root
+               &&&
+               (listA (getChildren >>. drop 1))) -- get tree children, throw away 2
+               >>> arr2 T.mkTree -- construct new tree
+
+
+dropChildren :: Int -> IOSArrow XmlTree XmlTree 
+dropChildren i = processChildrenList (drop i)
+
+takeChildren :: Int -> IOSArrow XmlTree XmlTree 
+takeChildren i = processChildrenList (take i)
+
+-- | Modifies a tree by running a function on the list of children
+processChildrenList :: ([XmlTree] -> [XmlTree]) -> IOSArrow XmlTree XmlTree
+processChildrenList f = traceMsg 1 "parseRowTree"
                >>>
                getNode -- get tree root
                &&&
-               (listA (getChildren >>. drop 2)) -- get tree children, throw away 2
+               (listA (getChildren >>. f)) -- get tree children, throw away 2
                >>> arr2 T.mkTree -- construct new tree
 
 
@@ -195,16 +246,24 @@ parseCredentials path = do
     hClose h
     return (user,pass)
 
-myDateParser :: String -> UTCTime
-myDateParser s = let blubb = parseTime defaultTimeLocale "%F" s in
-                 case blubb of
-                     Just d  -> d
-                     Nothing -> error "myDateParser: couldn't parse date"
+-- | Parses two times from a string formatted like "12:00 - 13:00"
+myTimeParser :: String -> Maybe (UTCTime,UTCTime)
+myTimeParser s = do
+  let [s1,s2] = splitOn "-" s
+  start <- parseTime defaultTimeLocale "%R" s1
+  end   <- parseTime defaultTimeLocale "%R" s2
+  return (start,end)
 
--- OK time works. Leave this for now
-timeFun :: IO ()
-timeFun = do
-    print "hej"
+-- TODO: A room is always presented as "x, y". Decide which of x and y is important
+--       and return only that here
+myRoomParser :: String -> Maybe Room
+myRoomParser s = return s
+
+-- | Parses a date from a string formatted like "anytext%here 2015-03-29"
+myDateParser :: String -> Maybe UTCTime
+myDateParser s = do
+  let [s1,s2] = splitOn " " s
+  parseTime defaultTimeLocale "%F" s2
 
 
 -- Save a string to "hej.html"
@@ -220,13 +279,3 @@ debugSaveBS path a = do
     file <- openFile path ReadWriteMode
     BS.hPut file a
     hClose file
-
-
--- response :: IO String
--- response =
---     do
---       (_, rsp)
---          <- Network.Browser.browse $ do
---                setAllowRedirects True -- handle HTTP redirects
---                request $ getRequest "http://www.haskell.org/"
---       return (take 100 (rspBody rsp))
