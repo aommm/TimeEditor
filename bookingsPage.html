@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+  <html>
+  <head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow">
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="application-name" content="TimeEdit"/> 
+<meta name="msapplication-TileColor" content="#88b58d"/> 
+<meta name="msapplication-TileImage" content="/static/3_6_0_Z2_1041/iepinned.png"/>
+<meta http-equiv="Content-Style-Type" content="text/css">
+<script>
+window.timers = window.timers || [];
+window.beforeload = window.beforeload || (new Date()).getTime();
+</script><meta id="iosviewport" name = "viewport" content = "width = 480"><title>TimeEdit Chalmers - Mina bokningar</title>
+<link rel="stylesheet" href="/static/3_6_0_Z2_1041/css/min.css" type="text/css">
+
+    <style type="text/css">
+        #texttable, .text { font-size: 13px;  }
+        .t { font-size: 14px; }
+        .restable td { line-height: 20px; }
+        .restable .box td { line-height: normal; position: static; }
+        .tBottom {  border-width: 0 20px 20px 0; }
+        .cNone { background: white; }
+        .weekColumn { width: 28px; }
+        .customTitleObjects, .mleft { padding-left: 2.8em; }
+        .customTitleObjects { padding-top: 1em; padding-bottom: 1em; }
+        .fullscreenheader, .acshow { padding-left: 4em; }
+        .desktop.autoscroll .ohfixed { padding-left: 3em; }
+        
+        
+        
+        
+.c-55 { background-color: #EBC8C9;}
+.c-70 { background-color: #AAAAAA;}
+
+
+@media (max-width: 850px), (max-device-width: 480px) { .exp { width: 14.285714%; }}    </style>
+  </head>
+<body class="">
+<div class="overlay" id="tipsoverlay" onclick="hideTips();return false;"></div>
+
+
+
+<span class="hidden" id="links_base" data-base="https://se.timeedit.net/web/chalmers/db1/b1/my.html?h=t&amp;sid=1002&amp;g=f"></span>
+<div id="header" class="ui-widget-header">
+
+<div id="pageHeader" class="pageHeader">
+
+<ul id="jsddm">
+    <li id="pageMenuButtonItem" class="pageMenuButton ac">
+    	<a href="javascript:void(0)" id="pageMenuButtonLink" class="pageMenu">
+    		&nbsp; Konto <span class="down-arrow"></span>
+    	</a>
+        <ul id="pageHeaderMenuList" class="ui-state-default">
+            <li><span class="jsddmText">Niklas Logren</span></li>
+            
+            <li><hr></li>
+    
+            
+            
+            
+            <li><a href="#inlineAbout" id="aboutbutton">Om TimeEdit</a></li>
+            <li><a href="/web/chalmers/db1/?en=t">GÃ¥ till startsidan</a></li>
+            <li><a href="/web/chalmers/db1/timeedit/p/b1/logout/">Logga ut</a></li>
+        </ul>
+    </li>
+</ul>
+
+
+<div class="ohfixed">
+<a href="/web/chalmers/db1/b1/" class="pageHeaderLogo">
+	<img src="/static/3_6_0_Z2_1041/logowhitetext3.png" width="82" height="23" alt="TimeEdit">
+</a>
+<a href="/web/chalmers/db1/b1/" class="pageHeaderLink">
+	<span class="pageHeaderInside">
+		Chalmers
+	</span>
+</a>
+<span class="pageHeaderCrum ac">&gt; Bokning</span>
+</div>
+</div>
+
+<div class="hidden">
+<div id="inlineAbout" class="pageHeaderFont">
+<div class="aboutimage"></div>
+<textarea id="abouttext" spellcheck="false" data-defaultLocale="sv_SE" data-url="/web/chalmers/db1/serverversion">
+Web version: 3.6.0.Z2 Date: 20150206 1041 Build: c3a0e2e. API: 3694981. Auth: te_3.6.0.Y.
+</textarea>
+<div>
+<a href="licenses.html" class="aboutblocklink clickable"><span class="linkedtext">Licenses</span></a>
+<a href="http://help.timeedit.se/wiki/index.php/Versionslogg_TimeEdit_Web"  class="aboutblocklink clickable"><span class="linkedtext">Version history</span></a>
+<div class="aboutsubtext">Copyright Â© 2009-2014 TimeEdit AB</div>
+</div> 
+</div>
+
+<div id="inlineSupport" style="padding: 50px;" class="pageHeaderFont">
+</div>
+</div>
+
+<div id="pageHeaderOverlay" class="overlay hidden"></div>     <a class="leftHeader clickable btr btrFirst ac" href="https://se.timeedit.net/web/chalmers/db1/b1/my.html?i=1Q5o06Xp00ZyQQYvZ0Yf"><span>Idag</span><div class="help">GÃ¥ till idag</div></a>
+     <a class="leftHeader clickable btr btrLeft leftHeaderWeek iosinvisible ac" href="https://se.timeedit.net/web/chalmers/db1/b1/my.html?i=1Q5o669560WyQQ75Z0705Z00p90075">&nbsp;<div class="help">GÃ¥ till fÃ¶regÃ¥ende mÃ¥nad</div></a>
+     <span class="leftHeader leftHeaderSmall leftHeaderWeek iosinvisible ac">Mar</span>
+     <a class="leftHeader clickable btr btrRight leftHeaderWeek iosinvisible ac" href="https://se.timeedit.net/web/chalmers/db1/b1/my.html?i=1Q5o669560WyQQ85Z0805Z00p90070">&nbsp;<div class="help">GÃ¥ till nÃ¤sta mÃ¥nad</div></a>
+     <a class="leftHeader clickable openRangeButton ac" id="openStartRangeButton" href="#searchDivContent" data-objectid="">
+     <span>Idag</span>
+     <div class="help">Ãndra startdatum</div>
+     </a>
+     
+     <a class="leftHeader clickable openRangeButton ac" id="openEndRangeButton" href="#searchDivContent" data-objectid="">
+      <span>+6 mÃ¥nader</span>
+      
+     <div class="help">Ãndra slutdatum</div>
+     </a>
+          <div class="rightHeader clickable tabSwitcher s460hide ac"><span class="tesprite tesprite-gear tespriteinlineblock"></span><span class="ht">Anpassa</span><div class="help">Anpassa</div></div>
+         <a href="#printdialog"  class="clickable rightHeader printlink ac"><span class="tesprite tesprite-printer tespriteinlineblock"></span><span class="ht">Skriv ut</span><div class="help">Skriv ut</div></a>
+	     <a href="#iCalDialogContent" class="iCalDialog clickable rightHeader ac iosinvisible"><span class="tesprite tesprite-date tespriteinlineblock"></span><span class="ht">Prenumerera</span><div class="help">Prenumerera</div></a>
+  <br class="clearBoth">
+</div>
+
+<div class="overlay" id="headlineTimeOverlay" style="display:none;"></div>
+<div class="overlay" id="datePickTimeOverlay" style="z-index:1300; display:none;"></div>
+<div id="headerPadder" class="clearBoth" style="height:62px">&nbsp;</div>
+      <div id="dateRange" class="ui-corner-all rangePickWrap smallScreenRangePick hidden topmenu">
+          <div class="quickperiodwrap">
+          
+          <div class="hidden"><label><input type="checkbox" id="fullweeksCheckbox" checked="checked">UtÃ¶ka vald period till hela veckor</label></div>
+          
+          </div>
+          <div class="rangePick rangePickStart" data-date="20150329">
+            <div class="rangePickHeader hidden">Start <span id="rangeStartNice">Idag</span><input READONLY type="text" class="hidden" id="txtRangeAltStart" value="20150329">
+             <input type="button" class="hidden" id="rangeTypeButtonStart" data-paramtext="0.d" value="FrÃ¥n idag" data-first="Kalender" data-second="FrÃ¥n idag"> 
+            </div>
+            <div id="flipStart" data-isRel="t">
+	            <div id="txtRangeStart" data-date="20150329"></div>
+	            <div id="txtRangeRelativeStart"><div class="ui-widget ui-widget-content ui-helper-clearfix ui-corner-all rangeRel ui-datepicker-inline">
+	            <div class="ui-widget-header ui-helper-clearfix ui-corner-all rangeTitle">Rullande start</div>
+<select class="te-ui-select ui-corner-all valueselect hidden" id="periodvaluestartRange" name="periodstartRange">
+		<option value="619" >Nu</option>
+	
+		<option value="0" SELECTED>Innevarande</option>
+		<option value="1" >1</option>
+		<option value="2" >2</option>
+		<option value="3" >3</option>
+		<option value="4" >4</option>
+		<option value="5" >5</option>
+	<option value="-1" >-1</option><option value="-2" >-2</option><option value="-3" >-3</option><option value="-4" >-4</option><option value="-5" >-5</option><option value="-6" >-6</option>
+</select>
+<div class="ui-widget-header datepicktop">
+<select class="te-ui-select ui-corner-all timeselect" id="periodtimestartRange" name="periodstartRange">
+<option value="n"  data-plur="mÃ¥nader" data-sing="mÃ¥nad">mÃ¥nader</option><option value="w"  data-plur="veckor" data-sing="vecka">veckor</option><option value="d" SELECTED data-plur="dagar" data-sing="dag">dagar</option><option value="h"  data-plur="timmar" data-sing="timme">timmar</option>
+
+</select>
+</div>
+  <div class="ui-datepicker ui-widget ui-helper-clearfix" style="display: block;">
+    <table class="ui-datepicker-calendar picktable">
+    <tbody>
+	<tr>
+	   
+	   <td onclick="selectPeriod('#periodvaluestartRange',-1);return false;"><a class="ui-state-default" href="#">-1</a></td>
+	   
+	   <td onclick="selectPeriod('#periodvaluestartRange',-2);return false;"><a class="ui-state-default" href="#">-2</a></td>
+	   
+	   <td onclick="selectPeriod('#periodvaluestartRange',-3);return false;"><a class="ui-state-default" href="#">-3</a></td>
+	   
+	   <td onclick="selectPeriod('#periodvaluestartRange',-4);return false;"><a class="ui-state-default" href="#">-4</a></td>
+	   
+	   <td onclick="selectPeriod('#periodvaluestartRange',-5);return false;"><a class="ui-state-default" href="#">-5</a></td>
+	   
+	   <td onclick="selectPeriod('#periodvaluestartRange',-6);return false;"><a class="ui-state-default" href="#">-6</a></td>
+	</tr>
+	<tr>
+	   
+	   <td class="ui-datepicker-current-day" onclick="selectPeriod('#periodvaluestartRange',0);return false;"><a class="ui-state-default ui-state-active" href="#">+0</a></td>
+	   
+	   <td class="" onclick="selectPeriod('#periodvaluestartRange',1);return false;"><a class="ui-state-default" href="#">+1</a></td>
+	   
+	   <td class="" onclick="selectPeriod('#periodvaluestartRange',2);return false;"><a class="ui-state-default" href="#">+2</a></td>
+	   
+	   <td class="" onclick="selectPeriod('#periodvaluestartRange',3);return false;"><a class="ui-state-default" href="#">+3</a></td>
+	   
+	   <td class="" onclick="selectPeriod('#periodvaluestartRange',4);return false;"><a class="ui-state-default" href="#">+4</a></td>
+	   
+	   <td class="" onclick="selectPeriod('#periodvaluestartRange',5);return false;"><a class="ui-state-default" href="#">+5</a></td>
+    </tr>
+    <tr><td colspan="8"> &nbsp; </td></tr>
+    <tr><td colspan="8" onclick="selectPeriod('#periodvaluestartRange',619);return false;"><a class="button" href="#">Starttidpunkt: nu</a></td></tr>
+    </tbody>
+    </table>
+  </div>
+	            </div></div>
+            </div>
+            <a class="datepickbottom flip flipStartButton clickable" href="javascript:void(0)" data-first="Rullande start"  data-second="Kalender">Rullande start</a>
+          </div>
+          <div class="rangePick rangePickEnd">
+            <div class="rangePickHeader hidden">Slut <span id="rangeEndNice">+6 mÃ¥nader</span><input READONLY type="text" class="hidden" id="txtRangeAltEnd" value="20150929"> 
+             <input type="button" class="hidden" id="rangeTypeButtonEnd"  data-paramtext="6.n" value="LÃ¤ngd"  data-first="Kalender" data-second="LÃ¤ngd"> 
+            </div>
+            <div id="flipEnd" data-isRel="t">
+	            <div id="txtRangeEnd" data-date="20150929"></div>
+	            <div id="txtRangeRelativeEnd"><div class="ui-widget ui-widget-content ui-helper-clearfix ui-corner-all rangeRel ui-datepicker-inline">
+	            <div class="ui-widget-header ui-helper-clearfix ui-corner-all rangeTitle">Rullande slut</div>
+<select class="te-ui-select ui-corner-all valueselect hidden" id="periodvalueendRange" name="periodendRange">
+	
+		<option value="0" >Hel</option>
+		<option value="1" >1</option>
+		<option value="2" >2</option>
+		<option value="3" >3</option>
+		<option value="4" >4</option>
+		<option value="5" >5</option>
+		<option value="6" SELECTED>6</option>
+		<option value="7" >7</option>
+		<option value="8" >8</option>
+		<option value="9" >9</option>
+		<option value="10" >10</option>
+		<option value="11" >11</option>
+		<option value="12" >12</option>
+	
+</select>
+<div class="ui-widget-header datepicktop">
+<select class="te-ui-select ui-corner-all timeselect" id="periodtimeendRange" name="periodendRange">
+<option value="n" SELECTED data-plur="mÃ¥nader" data-sing="mÃ¥nad">mÃ¥nader</option><option value="w"  data-plur="veckor" data-sing="vecka">veckor</option><option value="d"  data-plur="dagar" data-sing="dag">dagar</option><option value="h"  data-plur="timmar" data-sing="timme">timmar</option>
+
+</select>
+</div>
+  <div class="ui-datepicker ui-widget ui-helper-clearfix" style="display: block;">
+    <table class="ui-datepicker-calendar picktable">
+    <tbody>
+	<tr>
+	   
+	   <td class="" onclick="selectPeriod('#periodvalueendRange',0);return false;"><a class="ui-state-default" href="#">+0</a></td>
+	   
+	   <td class="" onclick="selectPeriod('#periodvalueendRange',1);return false;"><a class="ui-state-default" href="#">+1</a></td>
+	   
+	   <td class="" onclick="selectPeriod('#periodvalueendRange',2);return false;"><a class="ui-state-default" href="#">+2</a></td>
+	   
+	   <td class="" onclick="selectPeriod('#periodvalueendRange',3);return false;"><a class="ui-state-default" href="#">+3</a></td>
+	   
+	   <td class="" onclick="selectPeriod('#periodvalueendRange',4);return false;"><a class="ui-state-default" href="#">+4</a></td>
+	   
+	   <td class="" onclick="selectPeriod('#periodvalueendRange',5);return false;"><a class="ui-state-default" href="#">+5</a></td>
+	   </tr><tr>
+	   <td class="ui-datepicker-current-day" onclick="selectPeriod('#periodvalueendRange',6);return false;"><a class="ui-state-default ui-state-active" href="#">+6</a></td>
+	   
+	   <td class="" onclick="selectPeriod('#periodvalueendRange',7);return false;"><a class="ui-state-default" href="#">+7</a></td>
+	   
+	   <td class="" onclick="selectPeriod('#periodvalueendRange',8);return false;"><a class="ui-state-default" href="#">+8</a></td>
+	   
+	   <td class="" onclick="selectPeriod('#periodvalueendRange',9);return false;"><a class="ui-state-default" href="#">+9</a></td>
+	   
+	   <td class="" onclick="selectPeriod('#periodvalueendRange',10);return false;"><a class="ui-state-default" href="#">+10</a></td>
+	   
+	   <td class="" onclick="selectPeriod('#periodvalueendRange',11);return false;"><a class="ui-state-default" href="#">+11</a></td>
+	   </tr><tr>
+	   <td class="" onclick="selectPeriod('#periodvalueendRange',12);return false;"><a class="ui-state-default" href="#">+12</a></td>
+    </tr>
+    <tr><td colspan="8"> &nbsp; </td></tr>
+    <tr><td colspan="8" onclick="selectPeriod('#periodvalueendRange',0);return false;"><a class="button" href="#">Slutdatum:Hel</a></td></tr>
+    </tbody>
+    </table>
+  </div>
+	            </div></div>
+            </div>
+            <a class="datepickbottom flip flipEndButton clickable" href="javascript:void(0)" data-first="Rullande slut"  data-second="Kalender">Rullande slut</a>
+          </div>
+         <br class="clearBoth hidden">
+         <div class="rangeButtons hidden">
+         <select id="rangeTypeSelector" style="float:left" class="ui-corner-all basicSelect">
+                  <option value="0" selected>Kalender</option>
+                  <option value="1">FrÃ¥n idag</option>
+                  <option value="2">Idag till datum</option>
+          </select><div>
+                <span id="changeRangeMessage" class="stacktraceError" data-text="Slutdatumet Ã¤r fÃ¶re startdatumet."></span>
+             </div> <span class="nobr"></span>
+         </div>
+      </div>
+
+
+<div id="ajaxError" class="hidden"></div>
+
+
+
+
+<span id="linksdata" 
+data-linksbase="https://se.timeedit.net/web/chalmers/db1/b1/my.html?h=t&amp;sid=1002&amp;g=f" 
+data-sid="1002"
+data-lang="sv_SE"
+data-startLimit=""
+data-endLimit=""
+data-timeStep="15"
+data-flip="false"
+data-preferedLength="60"
+data-urltitle="Mina bokningar" 
+data-SaveScheduleName="Ange namnet fÃ¶r denna genvÃ¤g"
+data-RemoveSchedule="Vill du ta bort denna genvÃ¤g?"
+data-remove="Ta bort"
+data-freeresources="Lediga resurser"
+data-myresources="Senaste val"
+data-objectClickable="false"
+data-staticui="/static/3_6_0_Z2_1041/"
+data-searchids="0" 
+data-searchidsenc="0" 
+data-searchnames="Mina bokningar" 
+class="hidden"></span>
+
+<div class="topmenu"   style="display:none;"   data-showsearch="false"  id="searchDiv">
+<div id="searchDivContent2" class="fancyinside"><div id="objectMover" class="basketMover"></div>
+  <div class="stacktraceHeader">
+  Du saknar behÃ¶righet att anvÃ¤nda denna sida
+  </div>
+<div class="clearBoth"></div>
+</div>
+  <div id="favoritewrap" class="favoritewrap">
+	<h2 class="ui-widget-header ui-corner-all adminFieldTableHead searchDivHeader searchAdvanced">Historik</h2>
+	<ul class="historylist greyPanel favoriteitems"><li></li></ul>
+  </div>
+</div>
+
+
+<div class="overlay" id="footerOverlay" style="display:none;"></div>
+
+<div id="footer" class="topmenu topmenuright" style="display:none;">
+ <ul class="footerLinkList2 expBack" id="footerList">
+      <li class="clickable exp expTab " id="mergelinksElement2" title="Vyer"><span class="tesprite tesprite-calendar_view_month tespritecenter"></span>Vyer</li>
+      <li class="clickable exp expTab " id="colorlinksElement2" title="FÃ¤rg"><span class="tesprite tesprite-color_wheel tespritecenter"></span>FÃ¤rg</li>
+      <li class="clickable exp expTab " id="stylelinksElement2" title="Stil"><span class="tesprite tesprite-style tespritecenter"></span>Stil</li>
+      <li class="clickable exp expTab " id="timelinksElement2" title="Tid"><span class="tesprite tesprite-time tespritecenter"></span>Tid</li>
+      <li class="clickable exp expTab " id="formatlinksElement2" title="Export"><span class="tesprite tesprite-page_white_acrobat tespritecenter"></span>Export</li>
+      <li class="clickable exp expTab " id="sortlinksElement2" title="Sortering"><span class="tesprite tesprite-sort tespritecenter"></span>Sortering</li>
+  </ul>
+
+<div class="footer2 ui-widget-content" id="footer2">
+  <div class="flinks" id="sortlinksElement"><ul class="footerLinkList"><div class="rescontenttitle">Sortering</div>
+<li class="boxlist">
+
+<a href="https://se.timeedit.net/web/chalmers/db1/b1/my.html?i=1Q5o06ZpQ0#sortlinks" class="ui-state-defaultOFF linkCheckbox  bthigh ui-corner-all noborder">
+
+<input onClick="window.location='https://se.timeedit.net/web/chalmers/db1/b1/my.html?i=1Q5o06ZpQ0#sortlinks'" type="radio" name="n1" checked="checked">Tid stigande
+</a>
+
+
+
+
+<a href="https://se.timeedit.net/web/chalmers/db1/b1/my.html?i=1x5o06ZpQ0ZbQQ7#sortlinks" class="ui-state-defaultOFF linkCheckbox  btnormal ui-corner-all noborder">
+
+<input onClick="window.location='https://se.timeedit.net/web/chalmers/db1/b1/my.html?i=1x5o06ZpQ0ZbQQ7#sortlinks'" type="radio" name="n1" >Tid fallande
+</a>
+
+
+
+
+<a href="https://se.timeedit.net/web/chalmers/db1/b1/my.html?i=1x5o06ZpQ0ZbQQ8#sortlinks" class="ui-state-defaultOFF linkCheckbox  btnormal ui-corner-all noborder">
+
+<input onClick="window.location='https://se.timeedit.net/web/chalmers/db1/b1/my.html?i=1x5o06ZpQ0ZbQQ8#sortlinks'" type="radio" name="n1" >Ãndrad stigande
+</a>
+
+
+
+
+<a href="https://se.timeedit.net/web/chalmers/db1/b1/my.html?i=1x5o06ZpQ0ZbQQ9#sortlinks" class="ui-state-defaultOFF linkCheckbox  btnormal ui-corner-all noborder">
+
+<input onClick="window.location='https://se.timeedit.net/web/chalmers/db1/b1/my.html?i=1x5o06ZpQ0ZbQQ9#sortlinks'" type="radio" name="n1" >Ãndrad fallande
+</a>
+
+</li>
+</ul>
+  <ul class="footerLinkList"><div class="rescontenttitle">Gruppering</div>
+<li class="boxlist">
+
+<a href="https://se.timeedit.net/web/chalmers/db1/b1/my.html?i=1x5o06Wpa0ZbQQcQZ5#sortlinks" class="ui-state-defaultOFF linkCheckbox  btnormal ui-corner-all noborder">
+
+<input onClick="window.location='https://se.timeedit.net/web/chalmers/db1/b1/my.html?i=1x5o06Wpa0ZbQQcQZ5#sortlinks'" type="radio" name="n2" >Av
+</a>
+
+
+
+
+<a href="https://se.timeedit.net/web/chalmers/db1/b1/my.html?i=1x5o06Wpa0ZbQQcQZ#sortlinks" class="ui-state-defaultOFF linkCheckbox  bthigh ui-corner-all noborder">
+
+<input onClick="window.location='https://se.timeedit.net/web/chalmers/db1/b1/my.html?i=1x5o06Wpa0ZbQQcQZ#sortlinks'" type="radio" name="n2" checked="checked">Dagar
+</a>
+
+
+
+
+<a href="https://se.timeedit.net/web/chalmers/db1/b1/my.html?i=1x5o06Wpa0ZbQQcQZ6#sortlinks" class="ui-state-defaultOFF linkCheckbox  btnormal ui-corner-all noborder">
+
+<input onClick="window.location='https://se.timeedit.net/web/chalmers/db1/b1/my.html?i=1x5o06Wpa0ZbQQcQZ6#sortlinks'" type="radio" name="n2" >Veckor
+</a>
+
+</li>
+</ul>
+  </div>
+  <div class="flinks" id="colorlinksElement"><ul class="footerLinkList"><div class="rescontenttitle">FÃ¤rglÃ¤gg bokningar</div>
+<li class="boxlist">
+
+<a href="https://se.timeedit.net/web/chalmers/db1/b1/my.html?i=1u5o06ZpQ0ZlQQ0#colorlinks" class="ui-state-defaultOFF linkCheckbox  btnormal ui-corner-all noborder">
+
+<input onClick="window.location='https://se.timeedit.net/web/chalmers/db1/b1/my.html?i=1u5o06ZpQ0ZlQQ0#colorlinks'" type="radio" name="n3" >Standard
+</a>
+
+
+
+
+<a href="https://se.timeedit.net/web/chalmers/db1/b1/my.html?i=1u5o060pQ0QlQQg4ZZluxZ0#colorlinks" class="ui-state-defaultOFF linkCheckbox  btnormal ui-corner-all noborder">
+
+<input onClick="window.location='https://se.timeedit.net/web/chalmers/db1/b1/my.html?i=1u5o060pQ0QlQQg4ZZluxZ0#colorlinks'" type="radio" name="n3" >Svartvitt
+</a>
+
+
+
+
+<a href="https://se.timeedit.net/web/chalmers/db1/b1/my.html?i=1u5o56Zpx04lQQQ0ZluQgZ0#colorlinks" class="ui-state-defaultOFF linkCheckbox  btnormal ui-corner-all noborder">
+
+<input onClick="window.location='https://se.timeedit.net/web/chalmers/db1/b1/my.html?i=1u5o56Zpx04lQQQ0ZluQgZ0#colorlinks'" type="radio" name="n3" >SÃ¶kvillkor
+</a>
+
+
+
+
+<a href="https://se.timeedit.net/web/chalmers/db1/b1/my.html?i=1u5o66Zpx04lQQQ0ZluQgZ0#colorlinks" class="ui-state-defaultOFF linkCheckbox  btnormal ui-corner-all noborder">
+
+<input onClick="window.location='https://se.timeedit.net/web/chalmers/db1/b1/my.html?i=1u5o66Zpx04lQQQ0ZluQgZ0#colorlinks'" type="radio" name="n3" >PÃ¥gÃ¥ende
+</a>
+
+</li>
+</ul><ul class="footerLinkList">
+
+<li data-id="" class="headlineLink">
+<span title="FÃ¤rglÃ¤gg efter innehÃ¥ll" class="headlineLink">
+
+FÃ¤rglÃ¤gg efter innehÃ¥ll
+</span>
+</li>
+
+</ul></div>
+  <div class="flinks" id="mergelinksElement"><ul class="footerLinkList"><div class="rescontenttitle">Vyer</div>
+
+<li data-id="" class="lefttext">
+<a href="https://se.timeedit.net/web/chalmers/db1/b1/my.html?i=1Q5c06ZpQ0#mergelinks" class="ui-state-defaultOFF linkCheckbox  btnormal ui-corner-all ">
+
+<input onClick="window.location='https://se.timeedit.net/web/chalmers/db1/b1/my.html?i=1Q5c06ZpQ0#mergelinks'" type="checkbox" name="n5" >Visa grafiskt schema
+</a>
+</li>
+
+
+<li data-id="" class="lefttext">
+<a href="https://se.timeedit.net/web/chalmers/db1/b1/my.html?i=1u5o06ZpQ0ZyQQc#mergelinks" class="ui-state-defaultOFF linkCheckbox  btnormal ui-corner-all ">
+
+<input onClick="window.location='https://se.timeedit.net/web/chalmers/db1/b1/my.html?i=1u5o06ZpQ0ZyQQc#mergelinks'" type="checkbox" name="n5" >Linjerat
+</a>
+</li>
+
+
+<li data-id="" class="lefttext">
+<a href="https://se.timeedit.net/web/chalmers/db1/b1/my.html?i=1b5o06Zpn0ZnQQQo#mergelinks" class="ui-state-defaultOFF linkCheckbox  btnormal ui-corner-all ">
+
+<input onClick="window.location='https://se.timeedit.net/web/chalmers/db1/b1/my.html?i=1b5o06Zpn0ZnQQQo#mergelinks'" type="checkbox" name="n5" >Visa sÃ¶kobjekt i schemat
+</a>
+</li>
+
+
+<li data-id="" class="lefttext">
+<a href="https://se.timeedit.net/web/chalmers/db1/b1/my.html?i=1y5o06ZpQ0ZyQQc#mergelinks" class="ui-state-defaultOFF linkCheckbox  btnormal ui-corner-all ">
+
+<input onClick="window.location='https://se.timeedit.net/web/chalmers/db1/b1/my.html?i=1y5o06ZpQ0ZyQQc#mergelinks'" type="checkbox" name="n5" >Ett schema per sÃ¶kvillkor
+</a>
+</li>
+
+
+<li data-id="" class="lefttext">
+<a href="https://se.timeedit.net/web/chalmers/db1/b1/my.html?i=1n5o06Zpl0ZbQQQo#mergelinks" class="ui-state-defaultOFF linkCheckbox  bthigh ui-corner-all ">
+
+<input onClick="window.location='https://se.timeedit.net/web/chalmers/db1/b1/my.html?i=1n5o06Zpl0ZbQQQo#mergelinks'" type="checkbox" name="n5" checked="checked">DÃ¶lj tomma kolumner
+</a>
+</li>
+
+</ul>
+  
+  <ul class="footerLinkList boxlist" id="columnorder">
+
+<li data-id="" class="headlineLink">
+<span title="Synliga kolumner" class="headlineLink">
+
+Synliga kolumner
+</span>
+</li>
+
+
+<li data-id="" class="">
+<span title="Drag och slÃ¤pp fÃ¶r att Ã¤ndra ordning" class="">
+
+Drag och slÃ¤pp fÃ¶r att Ã¤ndra ordning
+</span>
+</li>
+
+
+<li data-id="186-24-Lokal.186-23- " class="lefttext">
+<a href="https://se.timeedit.net/web/chalmers/db1/b1/my.html?i=1l5oL63tq0WlQQY7ZuW68Z0xpV1Q5W1W653j#mergelinks" class="ui-state-defaultOFF linkCheckbox  bthigh ui-corner-all ">
+
+<input onClick="window.location='https://se.timeedit.net/web/chalmers/db1/b1/my.html?i=1l5oL63tq0WlQQY7ZuW68Z0xpV1Q5W1W653j#mergelinks'" type="checkbox" name="n6" checked="checked">Lokal
+</a>
+</li>
+
+
+<li data-id="f2-Kommentar.f8- " class="lefttext">
+<a href="https://se.timeedit.net/web/chalmers/db1/b1/my.html?i=1l5on66cq0vlQQYoZaVxvZ0wpjWQo3WK#mergelinks" class="ui-state-defaultOFF linkCheckbox  bthigh ui-corner-all ">
+
+<input onClick="window.location='https://se.timeedit.net/web/chalmers/db1/b1/my.html?i=1l5on66cq0vlQQYoZaVxvZ0wpjWQo3WK#mergelinks'" type="checkbox" name="n6" checked="checked">Kommentar
+</a>
+</li>
+
+</ul>
+  </div>
+  <div class="flinks" id="adminlinksElement"><ul class="footerLinkList"><div class="rescontenttitle">AdministratÃ¶rsinstÃ¤llningar</div>
+  </ul></div>
+  <div class="flinks" id="timelinksElement"><ul class="footerLinkList"><div class="rescontenttitle">Tid</div>
+
+<li data-id="" class="lefttext">
+<a href="https://se.timeedit.net/web/chalmers/db1/b1/my.html?i=1l5o06ZpQ0ZmQQc#timelinks" class="ui-state-defaultOFF linkCheckbox  btnormal ui-corner-all ">
+
+<input onClick="window.location='https://se.timeedit.net/web/chalmers/db1/b1/my.html?i=1l5o06ZpQ0ZmQQc#timelinks'" type="checkbox" name="n7" >Visa klocka
+</a>
+</li>
+
+
+<li data-id="" class="lefttext">
+<a href="https://se.timeedit.net/web/chalmers/db1/b1/my.html?i=1l5o06Zpm0ZcQQQo#timelinks" class="ui-state-defaultOFF linkCheckbox  bthigh ui-corner-all ">
+
+<input onClick="window.location='https://se.timeedit.net/web/chalmers/db1/b1/my.html?i=1l5o06Zpm0ZcQQQo#timelinks'" type="checkbox" name="n7" checked="checked">Korta veckodagsnamn
+</a>
+</li>
+
+
+<li data-id="" class="lefttext">
+<a href="https://se.timeedit.net/web/chalmers/db1/b1/my.html?i=1b5o06ZpQ0ZmQQc#timelinks" class="ui-state-defaultOFF linkCheckbox  btnormal ui-corner-all ">
+
+<input onClick="window.location='https://se.timeedit.net/web/chalmers/db1/b1/my.html?i=1b5o06ZpQ0ZmQQc#timelinks'" type="checkbox" name="n7" >Kort datumformat
+</a>
+</li>
+
+
+<li data-id="" class="lefttext">
+<a href="https://se.timeedit.net/web/chalmers/db1/b1/my.html?i=1c5o06Zpq0ZbQQQc#timelinks" class="ui-state-defaultOFF linkCheckbox  btnormal ui-corner-all ">
+
+<input onClick="window.location='https://se.timeedit.net/web/chalmers/db1/b1/my.html?i=1c5o06Zpq0ZbQQQc#timelinks'" type="checkbox" name="n7" >Visa endast timme
+</a>
+</li>
+
+</ul>
+  </div>
+  <div class="flinks" id="stylelinksElement"><div class="rescontenttitle rescontentpadd">Stil</div>   <ul class="footerLinkList footerLinkListFloat">
+
+<li data-id="" class="headlineLink">
+<span title="TextflÃ¶de" class="headlineLink">
+
+TextflÃ¶de
+</span>
+</li>
+
+<li class="boxlist">
+
+<a href="https://se.timeedit.net/web/chalmers/db1/b1/my.html?i=1Q5o06ZpQ0#stylelinks" class="ui-state-defaultOFF linkCheckbox  bthigh ui-corner-all noborder">
+
+<input onClick="window.location='https://se.timeedit.net/web/chalmers/db1/b1/my.html?i=1Q5o06ZpQ0#stylelinks'" type="radio" name="n8" checked="checked">Visa utan radbrytningar
+</a>
+
+
+
+
+<a href="https://se.timeedit.net/web/chalmers/db1/b1/my.html?i=1u5o06ZpQ0ZkQQc#stylelinks" class="ui-state-defaultOFF linkCheckbox  btnormal ui-corner-all noborder">
+
+<input onClick="window.location='https://se.timeedit.net/web/chalmers/db1/b1/my.html?i=1u5o06ZpQ0ZkQQc#stylelinks'" type="radio" name="n8" >Visa med radbrytningar
+</a>
+
+
+
+
+<a href="https://se.timeedit.net/web/chalmers/db1/b1/my.html?i=1u5o06ZpQ0ZkQQk#stylelinks" class="ui-state-defaultOFF linkCheckbox  btnormal ui-corner-all noborder">
+
+<input onClick="window.location='https://se.timeedit.net/web/chalmers/db1/b1/my.html?i=1u5o06ZpQ0ZkQQk#stylelinks'" type="radio" name="n8" >Radbrytning per typ
+</a>
+
+</li>
+
+</ul>
+   <ul class="footerLinkList footerLinkListFloat">
+
+<li data-id="" class="headlineLink">
+<span title="Textstorlek" class="headlineLink">
+
+Textstorlek
+</span>
+</li>
+
+
+<li data-id="" class="">
+<a href="https://se.timeedit.net/web/chalmers/db1/b1/my.html?i=1b5o06ZpQ0ZoQQ51#stylelinks" class="ui-state-defaultOFF underlinedlink  btnormal ui-corner-all ">
+
+Ãka textstorlek
+</a>
+</li>
+
+
+<li data-id="" class="">
+<a href="https://se.timeedit.net/web/chalmers/db1/b1/my.html?i=1b5o06ZpQ0ZoQQ55#stylelinks" class="ui-state-defaultOFF underlinedlink  btnormal ui-corner-all ">
+
+Minska textstorlek
+</a>
+</li>
+
+
+<li data-id="" class="">
+<a href="https://se.timeedit.net/web/chalmers/db1/b1/my.html?i=1b5o06ZpQ0ZoQQ57#stylelinks" class="ui-state-defaultOFF underlinedlink  btnormal ui-corner-all ">
+
+ÃterstÃ¤ll textstorlek
+</a>
+</li>
+
+</ul>
+    <form method="get" action="" id="gtitle"  onsubmit="return false" class="clearBoth">
+   <ul class="footerLinkList">
+	<li>
+    <div class="headlineLink">Rubrik</div>
+    <input type="text" name="title" id="gtitlevalue" value="" style="width:99%">
+    <input type="button" id="titlegenerate" onclick="updateTitlelink('https://se.timeedit.net/web/chalmers/db1/b1/my.html?h=t&amp;sid=1002&amp;g=f','#stylelinks')" title="Ãndra rubrik" value="Ãndra rubrik">
+   </li>
+   </ul>
+   </form>
+  </div>
+  <div class="flinks" id="formatlinksElement">
+  <ul class="footerLinkList">
+  <div class="rescontenttitle">Export</div>
+  	<li class="formatLinksItem ">
+     </li>
+  	<li class="formatLinksItem ">
+       <a href="https://se.timeedit.net/web/chalmers/db1/b1/my.ics?sid=1002&amp;ku=4323&amp;k=F4ED4147BD7B5E62DA54AAC3EEBE48000" class="bt ui-state-defaultOFF bth" title="iCal"><span class="tesprite tesprite-calendar_view_month tespritefloatleft"></span> iCal</a>
+     </li>
+  	<li class="formatLinksItem ">
+     </li>
+  	<li class="formatLinksItem ">
+       <a href="https://se.timeedit.net/web/chalmers/db1/b1/my.xls?i=1Q5o06ZpQ0" class="bt ui-state-defaultOFF bth" target="_blank" title="Excel"><span class="tesprite tesprite-page_white_excel tespritefloatleft"></span> Excel</a>
+     </li>
+  	<li class="formatLinksItem ">
+       <a href="https://se.timeedit.net/web/chalmers/db1/b1/my.ods?i=1Q5o06ZpQ0" class="bt ui-state-defaultOFF bth" target="_blank" title="ODS"><span class="tesprite tesprite-table tespritefloatleft"></span> ODS</a>
+     </li>
+  	<li class="formatLinksItem ">
+       <a href="https://se.timeedit.net/web/chalmers/db1/b1/my.txt?i=1Q5o06ZpQ0" class="bt ui-state-defaultOFF bth" target="_blank" title="Text"><span class="tesprite tesprite-page_white_text tespritefloatleft"></span> Text</a>
+     </li>
+  	<li class="formatLinksItem ">
+       <a href="https://se.timeedit.net/web/chalmers/db1/b1/my.csv?i=1Q5o06ZpQ0" class="bt ui-state-defaultOFF bth" target="_blank" title="CSV"><span class="tesprite tesprite-page_white_text tespritefloatleft"></span> CSV</a>
+     </li>
+  	<li class="formatLinksItem ">
+       <a href="https://se.timeedit.net/web/chalmers/db1/b1/my.html?h=f&amp;sid=1002&amp;g=f&amp;h2=2" class="bt ui-state-defaultOFF bth" target="_blank" title="HelskÃ¤rm"><span class="tesprite tesprite-fullscreen tespritefloatleft"></span> HelskÃ¤rm</a>
+     </li>
+  	</ul>
+  </div>
+</div>
+
+
+</div>
+
+<a href="#iCalDialogContent" class="iCalDialog clickable rightHeader headerbutton iCalDialogInside  ac iosboxvisible"><span class="tesprite tesprite-date tespriteinlineblock"></span><span>Prenumerera</span></a>
+<div class="headerbutton btrFirst2 iosboxvisible">
+<a class="leftHeader clickable btr btrLeft ac" href="https://se.timeedit.net/web/chalmers/db1/b1/my.html?i=1Q5o669560WyQQ75Z0705Z00p90075">&nbsp;<div class="help">GÃ¥ till fÃ¶regÃ¥ende mÃ¥nad</div></a>
+<span class="leftHeader leftHeaderSmall leftHeaderSmall2 ac">Mar</span>
+<a class="leftHeader clickable btr btrRight ac" href="https://se.timeedit.net/web/chalmers/db1/b1/my.html?i=1Q5o669560WyQQ85Z0805Z00p90070">&nbsp;<div class="help">GÃ¥ till nÃ¤sta mÃ¥nad</div></a>
+<br class="clearBoth">
+</div>
+
+
+<div id="printdialogwrap" class="topmenu topmenuright hidden">
+   <form id="printdialog" method="get" action="" target="_blank">
+    <h3>Skriv ut</h3>
+    <div class="printsectionlong"><div class="printtitle">Rubrik</div>
+       <input type="text" name="title" id="pdftitle" value="">
+	</div>
+    <div class="printsection"><div class="printtitle">Pappersformat</div>
+    <select name="pdfpagesize" id="pdfpagesize" class="niceSelectBlack selectMedium ui-multiselect ui-widget ui-state-default ui-corner-all">
+		 <option  value="A1">A1</option>
+		 <option  value="A2">A2</option>
+		 <option  value="A3">A3</option>
+		 <option SELECTED value="A4">A4</option>
+		 <option  value="A5">A5</option>
+	</select>
+	</div>
+	<div class="printsection"><div class="printtitle">Riktning</div>
+    <select name="pdfstanding" id="pdfstanding" class="niceSelectBlack selectMedium ui-multiselect ui-widget ui-state-default ui-corner-all">
+        <option value="t">StÃ¥ende</option>
+	    <option selected value="f">Liggande</option>
+	</select>
+	</div>
+	<div class="printsection"><div class="printtitle">Linjer</div>
+    <select name="pdflined" id="pdflined" class="niceSelectBlack selectMedium ui-multiselect ui-widget ui-state-default ui-corner-all">
+        <option  value="0">Av</option>
+        <option  value="1">Linjerat</option>
+        <option selected value="2">Rutat</option>
+	</select>
+	</div>
+	<div class="printsection"><div class="printtitle">Textstorlek</div>
+    <select name="pdffontsize" id="pdffontsize" class="niceSelectBlack selectMedium ui-multiselect ui-widget ui-state-default ui-corner-all">
+        <option  value="5">5</option>
+        <option  value="6">6</option>
+        <option  value="7">7</option>
+        <option  value="8">8</option>
+        <option  selected  value="9">9</option>
+        <option  value="10">10</option>
+        <option  value="11">11</option>
+        <option  value="12">12</option>
+        <option  value="13">13</option>
+	</select>
+	</div>
+	<div class="printsection"><div class="printtitle">FÃ¤rg</div>
+    <select name="pdfcolor" id="pdfcolor" class="niceSelectBlack selectMedium ui-multiselect ui-widget ui-state-default ui-corner-all">
+        
+        <option  selected  value="x90">Svartvitt</option>
+        <option value="">Ja</option>
+	</select>
+	</div>
+    <div class="printsection"><div class="printtitle">Sidhuvud och sidfot</div>
+    <select name="pdfheader" id="pdfheader" class="niceSelectBlack selectMedium ui-multiselect ui-widget ui-state-default ui-corner-all">
+        <option selected value="0">BÃ¥da</option>
+        <option value="1">Sidhuvud</option>
+        <option value="2">Sidfot</option>
+        <option value="3">Av</option>
+	</select>
+	</div>
+    <input type="button" id="pdfgenerate" class="nicePrintButton" onclick="updatePdflink('https://se.timeedit.net/web/chalmers/db1/b1/my.pdf?h=t&amp;sid=1002&amp;g=f','')" value="Skriv ut">
+   </form>
+   <br class="clearBoth">
+</div>
+
+
+
+ <div id="iCalDialogContent" class="topmenu topmenuright hidden">
+     <h3>Prenumerera</h3>
+     Tid <select class="te-ui-select ui-corner-all timeselect" id="periodical" name="periodical">
+        <option value="https://se.timeedit.net/web/chalmers/db1/b1/my.ics?i=6dD6E768Q08AQQ33Z8179Z08yA78B90Z3777t64t5A780QEF802DB5" selected="SELECTED" data-url="https://se.timeedit.net/web/chalmers/db1/b1/my.ics?i=6dD6E768Q08AQQ33Z8179Z08yA78B90Z3777t64t5A780QEF802DB5">Rullande 2 veckor</option>
+        <option value="https://se.timeedit.net/web/chalmers/db1/b1/my.ics?i=6dF8CB69Q0AEQQ05ZD0B1Z02y278DB1Z0722t60t5A8ADQA9D6CB6D"  data-url="https://se.timeedit.net/web/chalmers/db1/b1/my.ics?i=6dF8CB69Q0AEQQ05ZD0B1Z02y278DB1Z0722t60t5A8ADQA9D6CB6D">Rullande 4 veckor</option>
+        <option value="https://se.timeedit.net/web/chalmers/db1/b1/my.ics?i=667Q5AQ2708CQd2DZD18880Bt9FZAAE80t9BE6B75EE8ED0306"  data-url="https://se.timeedit.net/web/chalmers/db1/b1/my.ics?i=667Q5AQ2708CQd2DZD18880Bt9FZAAE80t9BE6B75EE8ED0306">Idag +6 mÃ¥nader</option>
+     </select>
+     <p id="icaltext" class="icalsubtext">Kopiera och klistra in fÃ¶ljande adress i ett kalenderprogram.</p>
+     <input id="icalurl" class="icalurl" type="text" value="https://se.timeedit.net/web/chalmers/db1/b1/my.ics?i=6dD6E768Q08AQQ33Z8179Z08yA78B90Z3777t64t5A780QEF802DB5">
+     <a id="icalurl2" href="https://se.timeedit.net/web/chalmers/db1/b1/my.ics?i=6dD6E768Q08AQQ33Z8179Z08yA78B90Z3777t64t5A780QEF802DB5" class="icalsublink clickable">iPhone & iPad: <span class="linkedtext">LÃ¤nk fÃ¶r prenumeration</span></a>
+
+     <div id="gcalwrap" class="gcal hidden">
+     <span class="icalsubtext">OBS! Google Calendar stÃ¶djer inte adresser lÃ¤ngre Ã¤n 255 tecken, anvÃ¤nd nedanstÃ¥ende adress istÃ¤llet.</span>
+     <input id="icalurlgoogle" class="icalurl" type="text" value="https://se.timeedit.net/web/chalmers/db1/b1/my.ics?i=6dD6E768Q08AQQ33Z8179Z08yA78B90Z3777t64t5A780QEF802DB5">
+     </div>
+     
+ </div>
+ 
+ 
+
+
+
+<div id="contents" class="ewrap expandtab2content">
+<div id="texttable">
+  <table cellspacing="0" class="restable">
+
+<tr><td colspan="30">
+
+
+</td></tr>
+
+<tr><td colspan="30"><div class="mleft">Inga bokningar</div></td></tr>
+</table>
+<div id="nextPage40" class="skipids clearBoth" data-colorids="" style="display: none">
+</div></div>
+<div id="errorPage" style="display: none"></div>
+
+<div id="bottom">&nbsp;</div>
+
+<div id="colorExplanation" class="colorexplainwrap">
+    
+    <div id="colorExplanationInner">
+  </div>
+  <div class="toolbar ac">   
+        <a href="https://se.timeedit.net/web/chalmers/db1/b1/my.html?h=f&sid=1002&g=f&h2=f" class="clickable toollink" target="_blank"><span class="tesprite tesprite-link tespriteinline"></span> <span class="lightlink"><span class="noZoom">LÃ¤nk till detta schema</span></span></a>
+        <a href="https://se.timeedit.net/web/chalmers/db1/b1/my.html?i=1Q5c06ZpQ0" class="clickable toollink"><span class="tesprite tesprite-grapical tespriteinline"></span> <span class="lightlink"><span class="noZoom">Grafiskt schema</span></span></a>
+</div>
+</div>
+</div>
+
+
+
+
+<script type="text/javascript">
+window.timers = window.timers || [];
+window.beforeload = window.beforeload || (new Date()).getTime();
+
+function loadScript(url, callback){
+    timers.push('loadscript ' + ((new Date()).getTime() - beforeload) + 'ms');
+    var script = document.createElement("script")
+    script.type = "text/javascript";
+    if (script.readyState){ 
+        script.onreadystatechange = function(){
+            if (script.readyState == "loaded" ||
+                    script.readyState == "complete"){
+                script.onreadystatechange = null;
+                callback();
+            }
+        };
+    } else {  
+        script.onload = function(){
+            callback();
+        };
+    }
+    script.src = url;
+    document.getElementsByTagName("head")[0].appendChild(script);
+}
+
+function loadMyRes() {
+    var sid = Qt.join('&sid', $('#linksdata').attr('data-sid'));
+    var url = 'my.html?so=5&p=0.d,6.months&max=5&part=t&step=3&g=f' + sid;
+    $('#myreservationslist').load(url);
+}
+
+var PageLoaderNext;
+function initAutoPager(nr, callback) {
+	if (!$('#bottom' + nr).offset()) {
+		return;
+	}
+	var pages = $('#pagesData' + nr).attr('data-pagesjson');
+	try {
+		pages = jQuery.parseJSON(pages);
+	} catch(e) {
+		$("#errorPage" + nr).html('Invalid auto page info.' + e).fadeIn();
+	}
+	var loading = false;
+	var loadOK = true;
+	var next = pages.start;
+
+	function nextUrl() {
+		var link = $('#linksdata' + nr).attr('data-linksbase');
+		var url = link.split('?');
+		var path = url[1].split('&');
+		if (nr == "_o") {
+			setParam(path, 'start', next);
+		} else {
+			setParam(path, 'start', next);
+		}
+		if ((next + pages.max) >= pages.total) {
+		  setParam(path, 'end', '1');
+		}
+		var data = $('.skipids');
+		if(data.length > 0) {
+	      var color = $(data[data.length -1]);
+		  setParam(path, 'colorids', color.attr('data-colorids'));
+		}
+		return url[0] + '?' + path.join('&') + '&part=t&media=html';
+	}
+
+
+
+	function page() {
+		return (1 + next / pages.max);
+	}
+
+
+
+	function loadCompleted(nextDiv) {
+		var nextButton = $('#nextPageButton' + nr);
+		nextButton.html('' + nextButton.attr('data-text'));
+		if (callback) {
+			callback();
+		}
+		var m = next + pages.max;
+		var more = $('#nextPage' + nr + m);
+		nextButton.show();
+		if(more.length != 1) {
+		   nextButton.hide();
+		}
+		if ((next + pages.max) >= pages.total) {
+		  nextButton.fadeOut();
+		}
+		if (!loadOK) {
+			return;
+		}
+		$('#pageLinkId' + nr + page()).addClass('cur');
+		$('#pagesResultText' + nr).html('Visar ' + Math.max(1, pages.start) + ' - ' + Math.min(pages.total, next + (pages.max - 1)) + ' av ' + pages.total);
+		loading = false;
+	}
+
+
+
+	function loadNext() {
+		var nextDiv = $('#nextPage' + nr + next);
+		if (nextDiv.length != 1) {
+			return;
+		}
+		if (loadOK) {
+			$('#nextPageButton' + nr).html('<img src="/static/3_6_0_Z2_1041/loading.gif" alt="Loading..." width="16" height="16"> HÃ¤mtar sida ' + page());
+		}
+		$('.userObjectsOnly').hide();
+		var url = nextUrl();
+		if(url=='x') {
+		  return;
+		}
+		nextDiv.load(url, function(response, status, xhr) {
+			if (xhr.status == 200) {
+				loadOK = true;
+		        $('#colorExplanationList').append(nextDiv.find('.colorInnerWrapper'));
+			} else {
+				loadOK = false;
+				$("#errorPage" + nr).html("Unable to load page: " + page() + " (Error code:" + xhr.status + ")").fadeIn();
+			}
+			loadCompleted(nextDiv);
+		}).fadeIn("", function() {
+		});
+	}
+
+
+	function check() {
+		if (loading) {
+			return;
+		}
+		if ((next + pages.max) < pages.total) {
+			loading = true;
+			next += pages.max;
+			loadNext();
+		}
+	}
+   
+   return check;
+}
+
+function initFooter() {
+objectSearcherFF = 'osFF/web/chalmers/db11002_4Â 323';
+
+initSwitcher('sv_SE');
+initAutoWidth();
+timers.push('Footer ' + ((new Date()).getTime() - beforeload) + 'ms');
+}
+
+function makeDoubleDelegate(first, second) {
+    return function() {
+        if (first) {
+            first();
+        }
+        if (second) {
+            second();
+        }
+    }
+}
+
+window.onload = makeDoubleDelegate(window.onload, function() { loadScript('/static/3_6_0_Z2_1041/min.js', initFooter); } );
+timers.push('PageEnd ' + ((new Date()).getTime() - beforeload) + 'ms');
+</script>
+  </body>
+  </html>
+ 
