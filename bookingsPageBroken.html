@@ -458,14 +458,6 @@ Lokal
 
 
 <li data-id="" class="lefttext">
-<a href="https://se.timeedit.net/web/chalmers/db1/b1/my.html?i=1u5o66l4Q04lQQ5ZZYxQ5Z08p7u031#colorlinks" class="ui-state-defaultOFF linkCheckbox  btnormal ui-corner-all ">
-
-<input onClick="window.location='https://se.timeedit.net/web/chalmers/db1/b1/my.html?i=1u5o66l4Q04lQQ5ZZYxQ5Z08p7u031#colorlinks'" type="checkbox" name="n4" >1198, 1198
-</a>
-</li>
-
-
-<li data-id="" class="lefttext">
 <a href="https://se.timeedit.net/web/chalmers/db1/b1/my.html?i=1u5o66l3Q04lQQ5ZZYxQ5Z07p1u031#colorlinks" class="ui-state-defaultOFF linkCheckbox  btnormal ui-corner-all ">
 
 <input onClick="window.location='https://se.timeedit.net/web/chalmers/db1/b1/my.html?i=1u5o66l3Q04lQQ5ZZYxQ5Z07p1u031#colorlinks'" type="checkbox" name="n4" >5211, grupprum5211
@@ -827,16 +819,6 @@ Minska textstorlek
               <td class="column0 columnLine">5211, grupprum5211</td>
               <td class="column1 columnLine nw"></td>
         </tr>
-      
-
-
-               <tr  data-id="599978" class="clickable2" onclick="openRes(599978, this, 'time599978','&step=3')">
-          <td class="modifiedRecentlyTd"><span class="tesprite tesprite-floatright tesprite-new"></span></td>
-          
-          <td id="time599978" class="time tt " title="ID 599978">19:00 - 20:00</td>
-              <td class="column0 columnLine nw">1198, 1198</td>
-              <td class="column1 columnLine nw">a, b</td>
-        </tr>
 
    
 
@@ -844,8 +826,7 @@ Minska textstorlek
 <div id="nextPage40" class="skipids clearBoth" data-colorids="" style="display: none">
 </div></div>
 <div id="errorPage" style="display: none"></div>
-<p class="t modifiedexplain">&nbsp;<span class="tesprite tesprite-new tespriteinline tespritemiddle"></span> Ãndrad den senaste timmen.
-</p>
+
 <div id="bottom">&nbsp;</div>
 
 <div id="colorExplanation" class="colorexplainwrap">
@@ -1026,7 +1007,39 @@ timers.push('PageEnd ' + ((new Date()).getTime() - beforeload) + 'ms');
 </script>
   </body>
   </html>
- tus + ")").fadeIn();
+  + pages.max) >= pages.total) {
+		  nextButton.fadeOut();
+		}
+		if (!loadOK) {
+			return;
+		}
+		$('#pageLinkId' + nr + page()).addClass('cur');
+		$('#pagesResultText' + nr).html('Visar ' + Math.max(1, pages.start) + ' - ' + Math.min(pages.total, next + (pages.max - 1)) + ' av ' + pages.total);
+		loading = false;
+	}
+
+
+
+	function loadNext() {
+		var nextDiv = $('#nextPage' + nr + next);
+		if (nextDiv.length != 1) {
+			return;
+		}
+		if (loadOK) {
+			$('#nextPageButton' + nr).html('<img src="/static/3_6_0_Z2_1041/loading.gif" alt="Loading..." width="16" height="16"> HÃ¤mtar sida ' + page());
+		}
+		$('.userObjectsOnly').hide();
+		var url = nextUrl();
+		if(url=='x') {
+		  return;
+		}
+		nextDiv.load(url, function(response, status, xhr) {
+			if (xhr.status == 200) {
+				loadOK = true;
+		        $('#colorExplanationList').append(nextDiv.find('.colorInnerWrapper'));
+			} else {
+				loadOK = false;
+				$("#errorPage" + nr).html("Unable to load page: " + page() + " (Error code:" + xhr.status + ")").fadeIn();
 			}
 			loadCompleted(nextDiv);
 		}).fadeIn("", function() {

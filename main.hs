@@ -7,7 +7,7 @@ import System.IO
 import qualified Data.ByteString.Lazy as BS
 import qualified Data.ByteString.Lazy.Char8 as C8
 
-import Control.Lens hiding (deep)
+import Control.Lens hiding (deep, none)
 
 -- Networking
 import Network.Wreq
@@ -97,7 +97,7 @@ parseBookings' =    configSysVars (withTrace 1 : [])
                     -- >>> processChildren (this >>. drop 1)
                     >>> removeAllWhiteSpace -- remove nodes: XText "\n\t\t"
                     >>> processChildrenList (drop 2) -- remove first two rows
-                    >>> printDoc
+                    -- >>> printDoc
                     >>> processChildren (this)
                     -- >>> withTraceLevel 4 (traceDoc "resulting document")
                      -- >>> arr (\t -> Left ([],t)) >. (show.length)
@@ -153,9 +153,13 @@ parseAndRemoves =
 parseRowX :: IOSArrow XmlTree (Maybe Booking)
 parseRowX = 
             traceMsg 1 "parseRowX"
+            -- >>> withTraceLevel 4 (traceDoc "resulting doc")
+            -- >>> getChildren 
+            -- >>> withTraceLevel 4 (traceDoc "resulting doc")
             >>> ((getChildren >>. take 1) >>> parseDateTr)
                 &&&
-                ((getChildren >>. take 1 . drop 1) >>> parseRowTr)
+                ((getChildren >>. drop 1) >>> (this >>. take 1) >>> parseRowTr) -- TODO: why can't do drop and take at the same time?
+            -- >>> traceValue 1 show
             >>> arr (uncurry setBookingDay)
             >>> traceMsg 1 "parseRowX: made booking"
             >>> traceValue 1 show
@@ -164,7 +168,7 @@ parseRowX =
 -- big TODO
 parseDateTr :: IOSArrow XmlTree (Maybe UTCTime)
 parseDateTr = 
-  -- withTraceLevel 4 (traceDoc "resulting doc")
+  --- withTraceLevel 4 (traceDoc "parseDateTr: resulting doc")
   dropChildren 1 >>> takeChildren 1
   >>> deep getText
   -- >>> traceMsg 1 "parseDateTr. Date string:"
@@ -172,7 +176,8 @@ parseDateTr =
   >>> arr myDateParser
 
 parseRowTr :: IOSArrow XmlTree (Maybe Booking)
-parseRowTr = (dropChildren 1 -- remove first <td>
+parseRowTr = -- withTraceLevel 4 (traceDoc "parseRowTr: resulting doc")
+             (dropChildren 1 -- remove first <td>
              >>> deep getText) 
              >. makeBooking
     where makeBooking [timeTd,roomTd,textTd] = do 
@@ -204,20 +209,35 @@ setBookingDay date booking = do
 -- (&&&) :: Arrow a => a b c -> a b c' -> a b (c, c')
 -- (>>>) :: Control.Category.Category cat => cat a b -> cat b c -> cat a c
 
+-- TODO: program is run in weird ways - if we have several times on the same date, the first is never parsed
 
--- TODO next: make this change the tree in appropriate ways
--- Quite hard?
--- Skip <tr> with date info, throw away <tr> with time info.
--- If no other left in this <tr> with date info, remove it
+
 parseRowTree :: IOSArrow XmlTree XmlTree
 parseRowTree = traceMsg 1 "parseRowTree"
-               >>> withTraceLevel 4 (traceDoc "resulting doc")
-               >>>
-               (getNode -- get tree root
-               &&&
-               (listA (getChildren >>. drop 1))) -- get tree children, throw away 2
-               >>> arr2 T.mkTree -- construct new tree
+               -- >>> withTraceLevel 4 (traceDoc "resulting doc")
+               >>> dropChildrenAt 1 1
+               -- >>> withTraceLevel 4 (traceDoc "taken 5!")
+               >>> ifA trIsTheLast none' this' -- TODO: always evaluates first argument =(
+               -- >>> withTraceLevel 4 (traceDoc "taken and dropped!")
+  where none' = traceMsg 1 "NONEe" >>> none
+        this' = traceMsg 1 "THIS" >>> this
 
+
+-- trIsTheLast :: IOSArrow XmlTree XmlTree
+trIsTheLast = listA getChildren >>> isA isSingleton --arr isSingleton >>> traceValue 1 show
+  -- neg (hasAttr "class")
+
+
+isSingleton :: [a] -> Bool
+isSingleton [x] = True
+isSingleton _   = False
+
+
+
+-- | Drops n children, beginning at position i
+dropChildrenAt :: Int -> Int -> IOSArrow XmlTree XmlTree 
+dropChildrenAt i n = processChildrenList dropAt
+  where dropAt l = take i l ++ take ((length l)-n-i) (drop (i+n) l)
 
 dropChildren :: Int -> IOSArrow XmlTree XmlTree 
 dropChildren i = processChildrenList (drop i)
@@ -227,7 +247,7 @@ takeChildren i = processChildrenList (take i)
 
 -- | Modifies a tree by running a function on the list of children
 processChildrenList :: ([XmlTree] -> [XmlTree]) -> IOSArrow XmlTree XmlTree
-processChildrenList f = traceMsg 1 "parseRowTree"
+processChildrenList f = traceMsg 1 "processChildrenList"
                >>>
                getNode -- get tree root
                &&&
