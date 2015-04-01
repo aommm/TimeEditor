@@ -125,7 +125,7 @@ parseAndRemoves =
                    >>> traceMsg 1 "trueArr: 2"
                    >>> ((arr snd
                         -- >>> withTraceLevel 4 (traceDoc "resulting doc") 
-                        >>> (parseRowX &&& parseRowTree)
+                        >>> ifThenSaveResult (parseRowX &&& parseRowTree) (arr Just) (arr $ const Nothing)
                         >>> traceMsg 1 "rowx and tree done")
                    &&& (
                     arr fst
@@ -136,17 +136,26 @@ parseAndRemoves =
                    -- >>> traceValue 1 show
                    >>> ifA (isA parseSuccess) continue end
                    >>> traceMsg 1 "trueArr: 4"
-        parseSuccess ((Just x,  t), xs) = trace "parseSuccess: true"  $ True
-        parseSuccess ((Nothing, t), xs) = trace "parseSuccess: false" $ False
+        parseSuccess (Just (Just x,  t), xs) = trace "parseSuccess: true"  $ True
+        parseSuccess (Just (Nothing, t), xs) = trace "parseSuccess: false" $ False -- TODO nothing
+        parseSuccess (Nothing,           xs) = trace "parseSuccess: false" $ False -- TODO nothing
         continue =  traceMsg 1 "continue" >>>
-                    arr (\((Just x, t), xs) -> Left (x:xs,t))
+                    arr (\(Just (Just x, t), xs) -> Left (x:xs,t))
                     >>> parseAndRemoves
         end = traceMsg 1 "end" >>>
-              arr (\((Nothing, _t), xs) -> Right xs)
+              arr (\(Nothing, xs) -> Right xs)
+              -- arr (\(Just (Nothing, _t), xs) -> Right xs)
 
         falseArr = traceMsg 1 "falseArr" >>>
             this
 
+
+
+
+-- | Evaluates an expression and passes the resulting value into t if it's not empty.
+--   If it is empty, runs f instead.
+ifThenSaveResult :: ArrowIf a => a b c -> a c d -> a () d -> a b d
+ifThenSaveResult c t f  = ifA c (c >>> t) (arr (\_ -> ()) >>> f)
 
 -- (>>.) :: a b c -> ([c] -> [d]) -> a b d
 -- (>.)  :: a b c -> ([c] -> d)   -> a b d
