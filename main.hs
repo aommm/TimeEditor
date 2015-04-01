@@ -125,7 +125,7 @@ parseAndRemoves =
                    >>> traceMsg 1 "trueArr: 2"
                    >>> ((arr snd
                         -- >>> withTraceLevel 4 (traceDoc "resulting doc") 
-                        >>> ifThenSaveResult (parseRowX &&& parseRowTree) (arr Just) (arr $ const Nothing)
+                        >>> ifExists (parseRowX &&& parseRowTree)
                         >>> traceMsg 1 "rowx and tree done")
                    &&& (
                     arr fst
@@ -149,13 +149,16 @@ parseAndRemoves =
         falseArr = traceMsg 1 "falseArr" >>>
             this
 
-
-
+-- | If the given arrow evaluates to a result, returns Just that result, otherwise Nothing
+--   Useful for parsing, if we're not sure whether a selector arrow will succeed or not.
+--   By using this, you can check for Nothing, and in that case supply a default value.
+ifExists :: ArrowIf a => a b c -> a b (Maybe c)
+ifExists f = ifThenKeepResult f (arr Just) (arr $ const Nothing)
 
 -- | Evaluates an expression and passes the resulting value into t if it's not empty.
 --   If it is empty, runs f instead.
-ifThenSaveResult :: ArrowIf a => a b c -> a c d -> a () d -> a b d
-ifThenSaveResult c t f  = ifA c (c >>> t) (arr (\_ -> ()) >>> f)
+ifThenKeepResult :: ArrowIf a => a b c -> a c d -> a () d -> a b d
+ifThenKeepResult c t f  = ifA c (c >>> t) (arr (\_ -> ()) >>> f)
 
 -- (>>.) :: a b c -> ([c] -> [d]) -> a b d
 -- (>.)  :: a b c -> ([c] -> d)   -> a b d
