@@ -124,6 +124,7 @@ parseAndRemoves =
                    >>> arr fromLeft
                    >>> traceMsg 1 "trueArr: 2"
                    >>> ((arr snd
+                        -- >>> withTraceLevel 4 (traceDoc "resulting doc") 
                         >>> (parseRowX &&& parseRowTree)
                         >>> traceMsg 1 "rowx and tree done")
                    &&& (
@@ -132,6 +133,7 @@ parseAndRemoves =
                     )
                    )
                    >>> traceMsg 1 "trueArr: 3"
+                   -- >>> traceValue 1 show
                    >>> ifA (isA parseSuccess) continue end
                    >>> traceMsg 1 "trueArr: 4"
         parseSuccess ((Just x,  t), xs) = trace "parseSuccess: true"  $ True
@@ -158,7 +160,7 @@ parseRowX =
             -- >>> withTraceLevel 4 (traceDoc "resulting doc")
             >>> ((getChildren >>. take 1) >>> parseDateTr)
                 &&&
-                ((getChildren >>. drop 1) >>> (this >>. take 1) >>> parseRowTr) -- TODO: why can't do drop and take at the same time?
+                (((getChildren >>. drop 1) >>. take 1) >>> parseRowTr) -- TODO: why can't do drop and take at the same time?
             -- >>> traceValue 1 show
             >>> arr (uncurry setBookingDay)
             >>> traceMsg 1 "parseRowX: made booking"
@@ -168,7 +170,7 @@ parseRowX =
 -- big TODO
 parseDateTr :: IOSArrow XmlTree (Maybe UTCTime)
 parseDateTr = 
-  --- withTraceLevel 4 (traceDoc "parseDateTr: resulting doc")
+  -- withTraceLevel 4 (traceDoc "parseDateTr: resulting doc")
   dropChildren 1 >>> takeChildren 1
   >>> deep getText
   -- >>> traceMsg 1 "parseDateTr. Date string:"
@@ -178,9 +180,10 @@ parseDateTr =
 parseRowTr :: IOSArrow XmlTree (Maybe Booking)
 parseRowTr = -- withTraceLevel 4 (traceDoc "parseRowTr: resulting doc")
              (dropChildren 1 -- remove first <td>
-             >>> deep getText) 
+             >>> deep getText -- (doesn't return "" if (comment) <td> is empty!)
+             ) 
              >. makeBooking
-    where makeBooking [timeTd,roomTd,textTd] = do 
+    where makeBooking (timeTd:roomTd:rest) = do  -- TODO: rest may contain an additional element: the comment for the booking
                                                 (start,end) <- myTimeParser timeTd
                                                 room <- myRoomParser roomTd
                                                 return $ Booking start end room
@@ -219,7 +222,7 @@ parseRowTree = traceMsg 1 "parseRowTree"
                -- >>> withTraceLevel 4 (traceDoc "taken 5!")
                >>> ifA trIsTheLast none' this' -- TODO: always evaluates first argument =(
                -- >>> withTraceLevel 4 (traceDoc "taken and dropped!")
-  where none' = traceMsg 1 "NONEe" >>> none
+  where none' = traceMsg 1 "NONEe" >>> dropChildren 1
         this' = traceMsg 1 "THIS" >>> this
 
 
