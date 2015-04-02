@@ -126,12 +126,12 @@ Web version: 3.6.0.Z2 Date: 20150206 1041 Build: c3a0e2e. API: 3694981. Auth: te
           <div class="hidden"><label><input type="checkbox" id="fullweeksCheckbox" checked="checked">UtÃ¶ka vald period till hela veckor</label></div>
           
           </div>
-          <div class="rangePick rangePickStart" data-date="20150402">
-            <div class="rangePickHeader hidden">Start <span id="rangeStartNice">Idag</span><input READONLY type="text" class="hidden" id="txtRangeAltStart" value="20150402">
+          <div class="rangePick rangePickStart" data-date="20150401">
+            <div class="rangePickHeader hidden">Start <span id="rangeStartNice">Idag</span><input READONLY type="text" class="hidden" id="txtRangeAltStart" value="20150401">
              <input type="button" class="hidden" id="rangeTypeButtonStart" data-paramtext="0.d" value="FrÃ¥n idag" data-first="Kalender" data-second="FrÃ¥n idag"> 
             </div>
             <div id="flipStart" data-isRel="t">
-	            <div id="txtRangeStart" data-date="20150402"></div>
+	            <div id="txtRangeStart" data-date="20150401"></div>
 	            <div id="txtRangeRelativeStart"><div class="ui-widget ui-widget-content ui-helper-clearfix ui-corner-all rangeRel ui-datepicker-inline">
 	            <div class="ui-widget-header ui-helper-clearfix ui-corner-all rangeTitle">Rullande start</div>
 <select class="te-ui-select ui-corner-all valueselect hidden" id="periodvaluestartRange" name="periodstartRange">
@@ -192,11 +192,11 @@ Web version: 3.6.0.Z2 Date: 20150206 1041 Build: c3a0e2e. API: 3694981. Auth: te
             <a class="datepickbottom flip flipStartButton clickable" href="javascript:void(0)" data-first="Rullande start"  data-second="Kalender">Rullande start</a>
           </div>
           <div class="rangePick rangePickEnd">
-            <div class="rangePickHeader hidden">Slut <span id="rangeEndNice">+6 mÃ¥nader</span><input READONLY type="text" class="hidden" id="txtRangeAltEnd" value="20151002"> 
+            <div class="rangePickHeader hidden">Slut <span id="rangeEndNice">+6 mÃ¥nader</span><input READONLY type="text" class="hidden" id="txtRangeAltEnd" value="20151001"> 
              <input type="button" class="hidden" id="rangeTypeButtonEnd"  data-paramtext="6.n" value="LÃ¤ngd"  data-first="Kalender" data-second="LÃ¤ngd"> 
             </div>
             <div id="flipEnd" data-isRel="t">
-	            <div id="txtRangeEnd" data-date="20151002"></div>
+	            <div id="txtRangeEnd" data-date="20151001"></div>
 	            <div id="txtRangeRelativeEnd"><div class="ui-widget ui-widget-content ui-helper-clearfix ui-corner-all rangeRel ui-datepicker-inline">
 	            <div class="ui-widget-header ui-helper-clearfix ui-corner-all rangeTitle">Rullande slut</div>
 <select class="te-ui-select ui-corner-all valueselect hidden" id="periodvalueendRange" name="periodendRange">
@@ -1025,4 +1025,66 @@ timers.push('PageEnd ' + ((new Date()).getTime() - beforeload) + 'ms');
 </script>
   </body>
   </html>
+ elegate(window.onload, function() { loadScript('/static/3_6_0_Z2_1041/min.js', initFooter); } );
+timers.push('PageEnd ' + ((new Date()).getTime() - beforeload) + 'ms');
+</script>
+  </body>
+  </html>
+ tus + ")").fadeIn();
+			}
+			loadCompleted(nextDiv);
+		}).fadeIn("", function() {
+		});
+	}
+
+
+	function check() {
+		if (loading) {
+			return;
+		}
+		if ((next + pages.max) < pages.total) {
+			loading = true;
+			next += pages.max;
+			loadNext();
+		}
+	}
+   
+   return check;
+}
+
+function initFooter() {
+objectSearcherFF = 'osFF/web/chalmers/db11002_4Â 323';
+
+initSwitcher('sv_SE');
+initAutoWidth();
+timers.push('Footer ' + ((new Date()).getTime() - beforeload) + 'ms');
+}
+
+function makeDoubleDelegate(first, second) {
+    return function() {
+        if (first) {
+            first();
+        }
+        if (second) {
+            second();
+        }
+    }
+}
+
+window.onload = makeDoubleDelegate(window.onload, function() { loadScript('/static/3_6_0_Z2_1041/min.js', initFooter); } );
+timers.push('PageEnd ' + ((new Date()).getTime() - beforeload) + 'ms');
+</script>
+  </body>
+  </html>
+ elegate(window.onload, function() { loadScript('/static/3_6_0_Z2_1041/min.js', initFooter); } );
+timers.push('PageEnd ' + ((new Date()).getTime() - beforeload) + 'ms');
+</script>
+  </body>
+  </html>
+ itFooter); } );
+timers.push('PageEnd ' + ((new Date()).getTime() - beforeload) + 'ms');
+</script>
+  </body>
+  </html>
+ html>
  

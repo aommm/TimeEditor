@@ -1,13 +1,11 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-import Data.Time
-import Data.Either.Unwrap
-import System.Locale -- locale needed for time
-import System.IO
-import qualified Data.ByteString.Lazy as BS
-import qualified Data.ByteString.Lazy.Char8 as C8
+module Api.MyBookings (
+    getBookings
+  ) where
 
-import Control.Lens hiding (deep, none)
+import Api
+import Api.Util
 
 -- Networking
 import Network.Wreq
@@ -17,44 +15,20 @@ import qualified Network.Wreq.Session as S
 import Text.XML.HXT.Core hiding (trace)
 import qualified Data.Tree.Class as T
 import Text.HandsomeSoup
+import Control.Lens hiding (deep, none)
 
 import Data.List.Split (splitOn)
+import Data.Either.Unwrap
+import qualified Data.ByteString.Lazy as BS
+import qualified Data.ByteString.Lazy.Char8 as C8
+import Data.Time
+import System.Locale -- locale needed for time
+
 
 import Debug.Trace
 
 -------------------------------------------------------------------------------
--- Types
-
--- A room booking
-data Booking = Booking {startTime :: Time, endTime :: Time, room :: Room}
-    deriving (Eq, Show)
-type Time = UTCTime
-type Room = String
-
--- Login credentials
-type Credentials = (Username,Password)
-type Username    = String
-type Password    = String
-
--------------------------------------------------------------------------------
--- Main program
-
-main :: IO ()
-main = S.withSession $ \sess -> do
-    -- timeFun
-    creds <- parseCredentials "credentials"
-    login sess creds
-    bookings <- getBookings sess
-    print bookings
-
-
-login :: S.Session -> Credentials -> IO ()
-login sess (user,pass) = do
-    let loginUrl = "https://se.timeedit.net/web/chalmers/db1/b1/r.html?h=t&sid=1002&id=-1"
-    let loginData = ["authServer" := ("student" :: String), "username" := user, "password" := pass]
-    r <- S.post sess loginUrl loginData
-    return ()
-
+-- Operations
 
 getBookings :: S.Session -> IO ([Booking])
 getBookings sess = do
@@ -243,43 +217,8 @@ trIsTheLast = listA getChildren >>> isA isSingleton --arr isSingleton >>> traceV
   -- neg (hasAttr "class")
 
 
-isSingleton :: [a] -> Bool
-isSingleton [x] = True
-isSingleton _   = False
-
-
-
--- | Drops n children, beginning at position i
-dropChildrenAt :: Int -> Int -> IOSArrow XmlTree XmlTree 
-dropChildrenAt i n = processChildrenList dropAt
-  where dropAt l = take i l ++ take ((length l)-n-i) (drop (i+n) l)
-
-dropChildren :: Int -> IOSArrow XmlTree XmlTree 
-dropChildren i = processChildrenList (drop i)
-
-takeChildren :: Int -> IOSArrow XmlTree XmlTree 
-takeChildren i = processChildrenList (take i)
-
--- | Modifies a tree by running a function on the list of children
-processChildrenList :: ([XmlTree] -> [XmlTree]) -> IOSArrow XmlTree XmlTree
-processChildrenList f = traceMsg 1 "processChildrenList"
-               >>>
-               getNode -- get tree root
-               &&&
-               (listA (getChildren >>. f)) -- get tree children, throw away 2
-               >>> arr2 T.mkTree -- construct new tree
-
-
 -------------------------------------------------------------------------------
 -- Utilities and misc parsing
-
-parseCredentials :: String -> IO Credentials
-parseCredentials path = do
-    h <- openFile path ReadMode
-    user <- hGetLine h
-    pass <- hGetLine h
-    hClose h
-    return (user,pass)
 
 -- | Parses two times from a string formatted like "12:00 - 13:00"
 myTimeParser :: String -> Maybe (UTCTime,UTCTime)
@@ -299,18 +238,3 @@ myDateParser :: String -> Maybe UTCTime
 myDateParser s = do
   let [s1,s2] = splitOn " " s
   parseTime defaultTimeLocale "%F" s2
-
-
--- Save a string to "hej.html"
-debugSaveS :: FilePath -> String -> IO ()
-debugSaveS path a = do
-    file <- openFile path ReadWriteMode
-    hPutStr file a
-    hClose file
-
--- Save a lazy bytestring to "hej.html"
-debugSaveBS :: FilePath -> BS.ByteString -> IO ()
-debugSaveBS path a = do
-    file <- openFile path ReadWriteMode
-    BS.hPut file a
-    hClose file
