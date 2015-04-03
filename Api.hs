@@ -4,7 +4,8 @@ module Api (
 	-- Types
   	Booking (..),
   	Time,
-  	Room,
+    Room,
+  	Purpose,
   	Credentials,
   	Username,
   	Password,
@@ -25,8 +26,10 @@ import System.Locale -- locale needed for time
 -- A room booking
 data Booking = Booking {startTime :: Time, endTime :: Time, room :: Room}
     deriving (Eq, Show)
-type Time = UTCTime
-type Room = String
+type Time    = UTCTime
+type Room    = String
+type Purpose = String
+
 
 -- Login credentials
 type Credentials = (Username,Password)
