@@ -10,7 +10,8 @@ module Api.Util (
   debugSaveS,
   debugSaveBS,
   mapFst,
-  mapSnd
+  mapSnd,
+  mapPair
   )
   where
 
@@ -78,6 +79,10 @@ debugSaveBS path a = do
     file <- openFile path ReadWriteMode
     BS.hPut file a
     hClose file
+
+
+mapPair :: (a -> b) -> (c -> d) -> (a, c) -> (b, d)
+mapPair f g (x,y) = (f x, g y)
 
 mapFst :: (a -> b) -> (a, c) -> (b, c)
 mapFst f (x,y) = (f x,y)

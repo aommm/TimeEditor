@@ -2,7 +2,8 @@
 
 module Api.MakeBooking (
   getAvailableTimes,
-  getAvailableRooms
+  getAvailableRooms,
+  getAvailablePurposes
   ) where
 
 -- TimeEditor
@@ -26,9 +27,6 @@ import Data.Maybe (fromJust)
 
 -------------------------------------------------------------------------------
 -- TODO list
-
-getAvailablePurposes :: S.Session -> IO ([Purpose])
-getAvailablePurposes = undefined
 
 makeBooking :: S.Session -> Booking -> IO Bool
 makeBooking = undefined
@@ -72,51 +70,58 @@ parseDate = arr (parseTime defaultTimeLocale "%Y%m%d")
 
 
 -------------------------------------------------------------------------------
--- Get available rooms for booking, given a time interval
+-- Available rooms
 
--- TODO:
--- print Time objects appropriately
--- Use getWith params instead of concatenating
--- getWith :: Options -> Session -> String -> IO (Response ByteString)
--- https://hackage.haskell.org/package/wreq-0.1.0.1/docs/Network-Wreq-Session.html
-
-
--- | Gets at most 30 rooms available for booking for a certain time interval.
---   Assumes date portion of both times to be the same (since no bookings can last several days)
+-- | Get available rooms for booking, given a time interval.
+--   Returns at most 30 rooms.
+--   Assumes date portion of both times to be the same (since no bookings can last several days).
 getAvailableRooms :: S.Session -> (Time,Time) -> IO ([Room])
-getAvailableRooms s ts = getAvailableRooms' s ts 0 30
+getAvailableRooms s (start,end) = getObjects s params 0 30
+ where
+   params = [("types","186"),("subtypes","186"), ("starttime",startTime), ("endtime",endTime),("dates",dates)]
+   dates      = formatTime defaultTimeLocale "%Y%m%d-%Y%m%d" start --"20150410-20150410"
+   startTime  = formatTime defaultTimeLocale "%R" start -- "8:00"
+   endTime    = formatTime defaultTimeLocale "%R" end   -- "9:00"
 
+-------------------------------------------------------------------------------
+-- Available purposes
 
--- | Gets available rooms for booking for a certain time interval.
---   Assumes date portion of both times to be the same (since no bookings can last several days)
+-- | Get available purposes for booking a room
+--   (As of now, only "Övrigt" is available)
+getAvailablePurposes :: S.Session -> IO ([Purpose])
+getAvailablePurposes s = getObjects s params 0 15
+ where
+   params = [("types","192"),("subtypes","192"), ("objects","192381.186")]
 
---   Returns bookings whose server indices are in interval [startIdx,endIdx]
+-------------------------------------------------------------------------------
+-- Parse Objects (used for rooms and purposes)
+
+-- | Gets available objects from objects.html given a parameter list.
+--   Returns objects in interval [startIdx,endIdx]
 --   Example: Use [0,15] to get the first 15 bookings
-getAvailableRooms' :: S.Session -> (Time,Time) -> Int -> Int -> IO ([Room])
-getAvailableRooms' sess (start,end) startIdx endIdx 
+--   To specify what kind of objects you want, add "types" and "subtypes" as params
+getObjects :: S.Session -> [(String,String)] -> Int -> Int -> IO [String]
+getObjects sess params startIdx endIdx
   | startIdx >= endIdx = return []
   | otherwise         = do
   r <- S.getWith opts sess url
   let html = C8.unpack $ r ^. responseBody
   -- debugSaveS ("roomsPage-"++show startIdx++".html") html
-  rooms     <- parseAvailableRooms html
-  moreRooms <- getAvailableRooms' sess (start,end) (startIdx+stepSize) endIdx
-  return $ rooms ++ moreRooms
+  objs     <- parseObjects html
+  moreObjs <- getObjects sess params (startIdx+stepSize) endIdx
+  return $ objs ++ moreObjs
   where
-    dates      = formatTime defaultTimeLocale "%Y%m%d-%Y%m%d" start --"20150410-20150410"
-    startTime  = formatTime defaultTimeLocale "%R" start -- "8:00"
-    endTime    = formatTime defaultTimeLocale "%R" end   -- "9:00"
     stepSize   = 15 -- how many to fetch each time. only 15 appears to work
-    url        = "https://se.timeedit.net/web/chalmers/db1/b1/objects.html?fr=t&partajax=t&im=f&add=f&sid=1002&l=sv_SE&step=1&grp=5&types=186&subtypes=186"
-    params     = [("start",show startIdx), ("max",show stepSize), ("dates",dates), ("starttime",startTime),("endtime",endTime)]
-    textParams = map (mapSnd pack) params -- Convert String->Text
+    url        = "https://se.timeedit.net/web/chalmers/db1/b1/objects.html?max=15&fr=t&partajax=t&im=f&add=f&sid=1002&l=sv_SE&step=1&grp=5"
+    params'    = params ++ [("start",show startIdx), ("max",show stepSize)]
+    textParams = map (mapPair pack pack) params' -- Convert String->Text
     opts       = defaults { WT.params = textParams } -- Create Wreq options object
 
--- | Parses a list of rooms from an HTML string
-parseAvailableRooms :: String -> IO [Room]
-parseAvailableRooms htmls = do
+-- | Parses a list of strings from an HTML string
+parseObjects :: String -> IO [String]
+parseObjects htmls = do
   let html = htmls `seq` parseHtml htmls
-  times <- runX $ html >>> removeLinks >>> parseAvailableRooms'
+  times <- runX $ html >>> removeLinks >>> parseObjects'
   let times' = map (unpack.strip.pack) times
   return $ times'
 
@@ -124,8 +129,8 @@ parseAvailableRooms htmls = do
 removeLinks :: IOSArrow XmlTree XmlTree
 removeLinks = processChildren (none `when` (hasAttrValue "class" (=="pageLinksWrap")))
 
-parseAvailableRooms' :: IOSArrow XmlTree String
-parseAvailableRooms' = configSysVars (withTrace 1 : [])
+parseObjects' :: IOSArrow XmlTree String
+parseObjects' = configSysVars (withTrace 1 : [])
                        -- >>> withTraceLevel 4 (traceDoc "resulting document")
                        >>> removeAllWhiteSpace
                        >>> getChildren
@@ -143,6 +148,9 @@ main = S.withSession $ \sess -> do
         oneHour = 3600
         t2 = addUTCTime oneHour t1
     rooms <- getAvailableRooms sess (t1,t2)
+    purposes <- getAvailablePurposes sess
     putStrLn $ "available times:"++show times
     putStrLn $ "available rooms:"++show rooms
+    putStrLn $ "available purposes:"++show purposes
+    putStrLn $ purposes !! 0
 
