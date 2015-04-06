@@ -1,5 +1,10 @@
 {-# LANGUAGE OverloadedStrings #-}
 
+-- TODO: Parse more information from bookings
+-- (Ids and so on)
+
+-- If not present, separate types for listing and making bookings
+
 module Api.MyBookings (
     getBookings
   ) where
@@ -172,7 +177,8 @@ parseRowTr = -- withTraceLevel 4 (traceDoc "parseRowTr: resulting doc")
     where makeBooking (timeTd:roomTd:rest) = do  -- TODO: rest may contain an additional element: the comment for the booking
                                                 (start,end) <- myTimeParser timeTd
                                                 room <- myRoomParser roomTd
-                                                return $ Booking start end room
+                                                let emptyStr = "" :: String
+                                                return $ Booking start end room (emptyStr,emptyStr) emptyStr emptyStr -- TODO
           makeBooking _ = Nothing
 
 
@@ -231,7 +237,7 @@ myTimeParser s = do
 -- TODO: A room is always presented as "x, y". Decide which of x and y is important
 --       and return only that here
 myRoomParser :: String -> Maybe Room
-myRoomParser s = return s
+myRoomParser s = return ("",s)
 
 -- | Parses a date from a string formatted like "anytext%here 2015-03-29"
 myDateParser :: String -> Maybe UTCTime

@@ -28,7 +28,9 @@ data Booking = Booking {
   startTime :: Time,
   endTime   :: Time,
   room      :: Room,
-  purpose   :: Purpose
+  purpose   :: Purpose,
+  privateComment :: PrivateComment,
+  publicComment  :: PublicComment
 } deriving (Eq, Show)
 
 type Time    = UTCTime
@@ -37,6 +39,9 @@ type Id   = String
 type Name = String
 type Room    = (Id,Name)
 type Purpose = (Id,Name)
+
+type PrivateComment = String
+type PublicComment  = String
 
 -- Login credentials
 type Credentials = (Username,Password)
