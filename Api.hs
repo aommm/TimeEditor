@@ -24,12 +24,19 @@ import System.Locale -- locale needed for time
 -- Types
 
 -- A room booking
-data Booking = Booking {startTime :: Time, endTime :: Time, room :: Room}
-    deriving (Eq, Show)
-type Time    = UTCTime
-type Room    = String
-type Purpose = String
+data Booking = Booking {
+  startTime :: Time,
+  endTime   :: Time,
+  room      :: Room,
+  purpose   :: Purpose
+} deriving (Eq, Show)
 
+type Time    = UTCTime
+
+type Id   = String
+type Name = String
+type Room    = (Id,Name)
+type Purpose = (Id,Name)
 
 -- Login credentials
 type Credentials = (Username,Password)

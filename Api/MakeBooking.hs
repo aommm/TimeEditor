@@ -25,11 +25,6 @@ import Data.Time
 import System.Locale (defaultTimeLocale)
 import Data.Maybe (fromJust)
 
--------------------------------------------------------------------------------
--- TODO list
-
-makeBooking :: S.Session -> Booking -> IO Bool
-makeBooking = undefined
 
 -------------------------------------------------------------------------------
 -- Get available times for booking
@@ -96,11 +91,13 @@ getAvailablePurposes s = getObjects s params 0 15
 -------------------------------------------------------------------------------
 -- Parse Objects (used for rooms and purposes)
 
+type Object = (String,String)
+
 -- | Gets available objects from objects.html given a parameter list.
 --   Returns objects in interval [startIdx,endIdx]
 --   Example: Use [0,15] to get the first 15 bookings
 --   To specify what kind of objects you want, add "types" and "subtypes" as params
-getObjects :: S.Session -> [(String,String)] -> Int -> Int -> IO [String]
+getObjects :: S.Session -> [(String,String)] -> Int -> Int -> IO [Object]
 getObjects sess params startIdx endIdx
   | startIdx >= endIdx = return []
   | otherwise         = do
@@ -118,23 +115,46 @@ getObjects sess params startIdx endIdx
     opts       = defaults { WT.params = textParams } -- Create Wreq options object
 
 -- | Parses a list of strings from an HTML string
-parseObjects :: String -> IO [String]
+parseObjects :: String -> IO [Object]
 parseObjects htmls = do
   let html = htmls `seq` parseHtml htmls
   times <- runX $ html >>> removeLinks >>> parseObjects'
-  let times' = map (unpack.strip.pack) times
-  return $ times'
+  let stripper = (unpack.strip.pack)
+      times' = map (mapPair stripper stripper) times
+  return times'
 
 -- | Removes div with "Fler resultat"-link from tree
 removeLinks :: IOSArrow XmlTree XmlTree
 removeLinks = processChildren (none `when` (hasAttrValue "class" (=="pageLinksWrap")))
 
-parseObjects' :: IOSArrow XmlTree String
+-- TODO: parse ID also
+parseObjects' :: IOSArrow XmlTree Object
 parseObjects' = configSysVars (withTrace 1 : [])
                        -- >>> withTraceLevel 4 (traceDoc "resulting document")
                        >>> removeAllWhiteSpace
                        >>> getChildren
-                       >>> deep getText
+                       >>> deep parseObject
+
+
+parseObject :: IOSArrow XmlTree Object
+parseObject = this >>> (getAttrValue0 "data-id" &&& getAttrValue0 "data-name")
+
+
+
+
+-------------------------------------------------------------------------------
+-- makeBooking
+-- 1198:
+-- "https://se.timeedit.net/web/chalmers/db1/b1/r.html?h=t&sid=1002&id=-1&step=2&id=-1&dates=20150406&datesEnd=20150406&startTime=0:00 &endTime=1:00 &o=192493.186,1198   &o=203460.192,Ãvrigt&nocache=3"
+-- https://se.timeedit.net/web/chalmers/db1/b1/r.html?h=t&sid=1002&id=-1&step=2&id=-1&dates=20150406&datesEnd=20150406&startTime=0:00&endTime=1:00&o=192493.186,1198&o=203460.192,Övrigt
+-- https://se.timeedit.net/web/chalmers/db1/b1/r.html?h=t&sid=1002&id=-1&step=2&id=-1&dates=20150406&datesEnd=20150406&startTime=0:00&endTime=1:00&o=192493.186,1198&o=203460.192,Övrigt&nocache=3
+
+-- Idegr10:
+-- "https://se.timeedit.net/web/chalmers/db1/b1/r.html?h=t&sid=1002&id=-1&step=2&id=-1&dates=20150415&datesEnd=20150415&startTime=16:00&endTime=17:00&o=192421.186,Idegr10&o=203460.192,Ãvrigt&nocache=3"
+
+makeBooking :: S.Session -> Booking -> IO Bool
+makeBooking = undefined
+
 
 -------------------------------------------------------------------------------
 -- Debugging
@@ -152,5 +172,5 @@ main = S.withSession $ \sess -> do
     putStrLn $ "available times:"++show times
     putStrLn $ "available rooms:"++show rooms
     putStrLn $ "available purposes:"++show purposes
-    putStrLn $ purposes !! 0
+    putStrLn $ snd $ purposes !! 0
 
