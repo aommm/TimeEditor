@@ -8,7 +8,9 @@ module Api.Util (
   parseCredentials,
   isSingleton,
   debugSaveS,
-  debugSaveBS
+  debugSaveBS,
+  mapFst,
+  mapSnd
   )
   where
 
@@ -76,3 +78,10 @@ debugSaveBS path a = do
     file <- openFile path ReadWriteMode
     BS.hPut file a
     hClose file
+
+mapFst :: (a -> b) -> (a, c) -> (b, c)
+mapFst f (x,y) = (f x,y)
+
+mapSnd :: (a -> b) -> (c, a) -> (c, b)
+mapSnd f (x,y) = (x,f y)
+
