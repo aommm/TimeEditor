@@ -55,12 +55,8 @@ getBookings sess = do
 parseBookings :: String -> IO [Booking]
 parseBookings htmls = do
     let html  = htmls `seq` parseHtml htmls
-    -- htmls <- readFile "exampleInput.html"
-
     bookings <- runX $ html >>> parseBookings'
-    print $ bookings
-    print $ length bookings
-    return []
+    return $ concat bookings -- TODO: fix list types
 
 -- css :: ArrowXml a => [Char] -> a XmlTree XmlTree 
 

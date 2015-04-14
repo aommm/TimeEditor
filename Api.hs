@@ -9,6 +9,8 @@ module Api (
   	Credentials,
   	Username,
   	Password,
+    PrivateComment,
+    PublicComment,
   	-- Operations
   	login
   ) where

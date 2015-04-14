@@ -7,7 +7,8 @@
 module Api.MakeBooking (
   getAvailableTimes,
   getAvailableRooms,
-  getAvailablePurposes
+  getAvailablePurposes,
+  makeBooking
   ) where
 
 -- TimeEditor
@@ -164,9 +165,7 @@ parseObject = this >>> (getAttrValue0 "data-id" &&& getAttrValue0 "data-name")
 
 makeBooking :: S.Session -> Booking -> IO Bool
 makeBooking sess (Booking start end room purpose private public) = do
-  -- print dataa
   E.catch postBookingRequest errorHandler
-  -- postBookingRequest 
   where
     postBookingRequest = do 
       r <- S.postWith opts sess url dataa
@@ -191,41 +190,3 @@ makeBooking sess (Booking start end room purpose private public) = do
               "kind" := ("reserve"::String),
               "url" := url
               ]
-
-{-
-      fe2[egen+text]
-      fe8[boknings%0D%0Akommentar]
-      id[-1]
-      dates[20150406]
-      datesEnd[20150406]
-      startTime[00%3A00]
-      endTime[01%3A00]
-      o[203460.192]
-      url[https%3A%2F%2Fse.timeedit.net%2Fweb%2Fchalmers%2Fdb1%2Fb1%2Fr.html%3Fh%3Dt%26sid%3D1002%26id%3D-1%26step%3D2%26id%3D-1%26dates%3D20150406%26datesEnd%3D20150406%26startTime%3D0%253A00%26endTime%3D1%253A00%26o%3D192493.186%252C1198%26o%3D203460.192%252C%25C3%2596vrigt]
-      kind[reserve]
--}
-
--------------------------------------------------------------------------------
--- Debugging
-main :: IO ()
-main = S.withSession $ \sess -> do
-    -- timeFun
-    creds <- parseCredentials "credentials"
-    login sess creds
-    times <- getAvailableTimes sess
-    let (t1,_) = fromJust times
-        oneHour = 3600
-        t2 = addUTCTime oneHour t1
-    rooms <- getAvailableRooms sess (t1,t2)
-    purposes <- getAvailablePurposes sess
-    putStrLn $ "available times:"++show times
-    putStrLn $ "available rooms:"++show rooms
-    putStrLn $ "available purposes:"++show purposes
-    -- putStrLn $ snd $ purposes !! 0
-    let b = Booking {startTime = t1, endTime = t2, room = head rooms,
-                     purpose = head purposes, publicComment="I am an ordinary citizen; stroll",
-                     privateComment="I am a robot" }
-    result <- makeBooking sess b
-    print result
-    return ()
-
