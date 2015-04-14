@@ -27,7 +27,7 @@ import Data.Either.Unwrap
 import qualified Data.ByteString.Lazy as BS
 import qualified Data.ByteString.Lazy.Char8 as C8
 import Data.Time
-import System.Locale -- locale needed for time
+import System.Locale (defaultTimeLocale) -- locale needed for time
 
 
 import Debug.Trace
