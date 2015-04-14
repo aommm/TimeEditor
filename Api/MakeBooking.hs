@@ -18,8 +18,7 @@ import Network.Wreq
 import qualified Network.Wreq.Types as WT
 import qualified Network.Wreq.Session as S
 import Network.HTTP.Types.Status (ok200)
--- TODO: cannot import and pattern match in makeBooking?
--- import Network.HTTP.Client.Types (StatusCodeException)
+import Network.HTTP.Client.Internal (HttpException (StatusCodeException))
 -- Parsing
 import Text.XML.HXT.Core hiding (trace)
 import qualified Data.Tree.Class as T
@@ -165,16 +164,18 @@ parseObject = this >>> (getAttrValue0 "data-id" &&& getAttrValue0 "data-name")
 
 makeBooking :: S.Session -> Booking -> IO Bool
 makeBooking sess (Booking start end room purpose private public) = do
-  print dataa
-  -- E.catch postBookingRequest errorHandler
-  postBookingRequest 
+  -- print dataa
+  E.catch postBookingRequest errorHandler
+  -- postBookingRequest 
   where
     postBookingRequest = do 
       r <- S.postWith opts sess url dataa
       let status = r ^. responseStatus 
       return $ status == ok200
-    -- errorHandler _ =
-      -- return False
+    errorHandler (StatusCodeException s _ _) = do
+      putStr "Error! Http error in makeBooking: "
+      print s
+      return False
     params = [("","")]
     textParams = map (mapPair pack pack) params -- Convert String->Text
     opts   = defaults { WT.params = textParams } -- Create Wreq options object
@@ -183,8 +184,8 @@ makeBooking sess (Booking start end room purpose private public) = do
               "fe8" := public,
               "dates" := formatTime defaultTimeLocale "%Y%m%d" start,
               "datesEnd" := formatTime defaultTimeLocale "%Y%m%d" end,
-              "startTime" := formatTime defaultTimeLocale "%R" end,
-              "endTime" := formatTime defaultTimeLocale "%R" start,
+              "startTime" := formatTime defaultTimeLocale "%R" start,
+              "endTime" := formatTime defaultTimeLocale "%R" end,
               "o" := fst room,
               "o" := fst purpose,
               "kind" := ("reserve"::String),
@@ -220,10 +221,11 @@ main = S.withSession $ \sess -> do
     putStrLn $ "available times:"++show times
     putStrLn $ "available rooms:"++show rooms
     putStrLn $ "available purposes:"++show purposes
-    putStrLn $ snd $ purposes !! 0
+    -- putStrLn $ snd $ purposes !! 0
     let b = Booking {startTime = t1, endTime = t2, room = head rooms,
                      purpose = head purposes, publicComment="I am an ordinary citizen; stroll",
                      privateComment="I am a robot" }
     result <- makeBooking sess b
     print result
+    return ()
 
