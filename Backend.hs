@@ -18,8 +18,14 @@ module Backend (
 
 import Api
 import Api.Util
+import Api.MakeBooking
+
+-- Networking
+import Network.Wreq
+import qualified Network.Wreq.Session as S
 
 -- Misc
+import Control.Monad
 import Data.Maybe
 import Data.Time
 import Data.Time.Format
@@ -80,18 +86,43 @@ saveRecurringBookings p bs = do
 
 -- Process the bookings in the given file,
 -- create bookings for each as long as possible
--- TODO: make fn :: RecurringBooking -> Booking
+
+-- TODO: * implement createBooking
+--       * save changed RecurringBookings somehow? Where?
 
 processRecurringBookings :: FilePath -> IO ()
-processRecurringBookings = undefined
+processRecurringBookings p = S.withSession $ \sess -> do
+    -- login
+    creds <- parseCredentials "credentials"
+    login sess creds
+    -- get bookings from recurringBookings
+    recBookings <- getRecurringBookings p
+    bookings <- concatMapM createBookings recBookings
+    -- try to place them
+    success <- mapM (makeBooking sess) bookings
+    print success
+    return () -- TODO: return something meaningful?
+
+createBookings :: RecurringBooking -> IO [Booking]
+createBookings rb = do
+  m <- createBooking rb
+  case m of
+    Nothing      -> return []
+    Just (b,rb') -> do
+      bs <- createBookings rb'
+      return $ b : bs
+
+-- TODO: add changed returned booking to return type? Maybe (Booking,RecurringBooking)
+createBooking :: RecurringBooking -> IO (Maybe (Booking,RecurringBooking))
+createBooking rb = undefined
 
 -------------------------------------------------------------------------------
 -- debugging data
 
 simpleRecBooking :: RecurringBooking
 simpleRecBooking = RecurringBooking {
-  startDate = fromJust $ parseTime defaultTimeLocale "%Y-%m-%d %H:%M" "2015-04-16 20:00",
-  endDate   = fromJust $ parseTime defaultTimeLocale "%Y-%m-%d %H:%M" "2015-04-16 22:00",
+  startDate = fromJust $ parseTime defaultTimeLocale "%Y-%m-%d %H:%M" "2015-04-18 20:00",
+  endDate   = fromJust $ parseTime defaultTimeLocale "%Y-%m-%d %H:%M" "2015-04-18 22:00",
   everyXWeeks = 1,
   rooms = manyRooms,
   purposes = fewPurposes,
@@ -121,3 +152,6 @@ fewPurposes = [("203460.192","Övrigt")]
 removeAt :: Int -> [a] -> [a]
 removeAt i l = take i l ++ drop (i+1) l
 
+-- | The 'concatMapM' function generalizes 'concatMap' to arbitrary monads.
+concatMapM        :: (Monad m) => (a -> m [b]) -> [a] -> m [b]
+concatMapM f xs   =  liftM concat (mapM f xs)
