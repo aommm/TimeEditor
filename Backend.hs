@@ -26,7 +26,8 @@ import qualified Network.Wreq.Session as S
 
 -- Misc
 import Control.Monad
-import Data.Maybe
+import Data.Either
+import Data.Maybe (fromJust)
 import Data.Time
 import Data.Time.Format
 import System.Locale (defaultTimeLocale)
@@ -37,9 +38,9 @@ import System.IO.Strict (hGetContents)
 -- Types
 
 data RecurringBooking = RecurringBooking {
-  startDate :: Time,
-  endDate :: Time,
-  everyXWeeks :: Int,
+  rStartTime :: Time,
+  rEndTime :: Time,
+  everyXWeeks :: Integer,
   rooms :: [Room],
   purposes :: [Purpose],
   rPrivateComment :: PrivateComment,
@@ -93,36 +94,74 @@ saveRecurringBookings p bs = do
 processRecurringBookings :: FilePath -> IO ()
 processRecurringBookings p = S.withSession $ \sess -> do
     -- login
+    putStrLn "logging in..."
     creds <- parseCredentials "credentials"
+    print creds
     login sess creds
     -- get bookings from recurringBookings
+    putStrLn "get recurring bookings..."
     recBookings <- getRecurringBookings p
-    bookings <- concatMapM createBookings recBookings
-    -- try to place them
+    putStrLn $ "number of recurring bookings: "++ show (length recBookings)
+    putStrLn "createBookings for each..."
+    bsAndRbs <- mapM (createBookings sess) recBookings
+    let bookings     = concatMap fst bsAndRbs
+        recBookings' = map snd bsAndRbs
+    -- save changed recurring bookings
+    putStrLn "save new recurring bookings..."
+    -- saveRecurringBookings p recBookings'
+    -- try to place bookings
+    putStrLn "place bookings..."
     success <- mapM (makeBooking sess) bookings
     print success
+    putStrLn "done!"
     return () -- TODO: return something meaningful?
 
-createBookings :: RecurringBooking -> IO [Booking]
-createBookings rb = do
-  m <- createBooking rb
+-- | Creates as many Bookings as possible from a RecurringBooking.
+--   Also returns a changed RecurringBooking
+createBookings :: S.Session -> RecurringBooking -> IO ([Booking],RecurringBooking)
+createBookings sess rb = do
+  m <- createBooking sess rb
   case m of
-    Nothing      -> return []
-    Just (b,rb') -> do
-      bs <- createBookings rb'
-      return $ b : bs
+    Right rb'    -> return ([],rb')
+    Left (b,rb') -> do
+      (bs,rbs) <- createBookings sess rb'
+      return $ (b:bs, rbs)
 
--- TODO: add changed returned booking to return type? Maybe (Booking,RecurringBooking)
-createBooking :: RecurringBooking -> IO (Maybe (Booking,RecurringBooking))
-createBooking rb = undefined
+-- Creates as many Booking objects as possible from a RecurringBooking.
+-- When no more Bookings can be created, returns only the RecurringBooking
+createBooking :: S.Session -> RecurringBooking -> IO (Either (Booking,RecurringBooking) RecurringBooking)
+createBooking sess rb = do
+  -- Assume HTTP works ok
+  (Just (sTime,eTime)) <- getAvailableTimes sess
+  if (rStartTime rb > eTime)
+  then return $ Right rb
+  else do
+    let xWeeks = fromInteger $ 60*60*24*7*(everyXWeeks rb)
+        times = iterate (addUTCTime xWeeks) (rStartTime rb)
+        notTooLate = takeWhile (<= (rEndTime rb)) times
+        notTooSoon = dropWhile (<= (rStartTime rb)) notTooLate
+        thisStartTime = head notTooSoon
+        nextStartTime = xWeeks `addUTCTime` thisStartTime
+    putStrLn "Termination"
+    print thisStartTime
+    print nextStartTime
+    return $ Right rb
+
+  -- if (rStartTime rb) `inRange` times
+  -- then undefined
+  -- else undefined
+
+
+
+-- getAvailableTimes :: S.Session -> IO (Maybe (Time,Time))
 
 -------------------------------------------------------------------------------
 -- debugging data
 
 simpleRecBooking :: RecurringBooking
 simpleRecBooking = RecurringBooking {
-  startDate = fromJust $ parseTime defaultTimeLocale "%Y-%m-%d %H:%M" "2015-04-18 20:00",
-  endDate   = fromJust $ parseTime defaultTimeLocale "%Y-%m-%d %H:%M" "2015-04-18 22:00",
+  rStartTime = fromJust $ parseTime defaultTimeLocale "%Y-%m-%d %H:%M" "2015-04-20 20:00",
+  rEndTime   = fromJust $ parseTime defaultTimeLocale "%Y-%m-%d %H:%M" "2015-04-20 22:00",
   everyXWeeks = 1,
   rooms = manyRooms,
   purposes = fewPurposes,
@@ -155,3 +194,7 @@ removeAt i l = take i l ++ drop (i+1) l
 -- | The 'concatMapM' function generalizes 'concatMap' to arbitrary monads.
 concatMapM        :: (Monad m) => (a -> m [b]) -> [a] -> m [b]
 concatMapM f xs   =  liftM concat (mapM f xs)
+
+-- | Checks if a is in the range [b,c] (inclusive)
+inRange :: Ord a => a -> (a,a) -> Bool
+inRange a (b,c) = a >= b && a <= c
