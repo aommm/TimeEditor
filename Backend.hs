@@ -50,6 +50,7 @@ data RecurringBooking = RecurringBooking {
 -------------------------------------------------------------------------------
 -- File IO
 
+-- TODO: fails if file does not exist! (I.e. get fails)
 addRecurringBooking :: FilePath -> RecurringBooking -> IO ()
 addRecurringBooking p b = do
   bs <- getRecurringBookings p
@@ -96,7 +97,6 @@ processRecurringBookings p = S.withSession $ \sess -> do
     -- login
     putStrLn "logging in..."
     creds <- parseCredentials "credentials"
-    print creds
     login sess creds
     -- get bookings from recurringBookings
     putStrLn "get recurring bookings..."
@@ -138,13 +138,20 @@ createBooking sess rb = do
   else do
     let xWeeks = fromInteger $ 60*60*24*7*(everyXWeeks rb)
         times = iterate (addUTCTime xWeeks) (rStartTime rb)
-        notTooLate = takeWhile (<= (rEndTime rb)) times
-        notTooSoon = dropWhile (<= (rStartTime rb)) notTooLate
+        notTooLate = takeWhile (<= eTime) times
+        notTooSoon = dropWhile (< sTime) notTooLate
         thisStartTime = head notTooSoon
         nextStartTime = xWeeks `addUTCTime` thisStartTime
     putStrLn "Termination"
+    -- print $ take 10 times
+    -- print eTime
+    -- print $ take 3 times
+    -- print notTooLate
+    -- print notTooSoon
     print thisStartTime
     print nextStartTime
+    -- TODO: Fix MakeBooking.hs
+    --       Continue with rooms etc
     return $ Right rb
 
   -- if (rStartTime rb) `inRange` times

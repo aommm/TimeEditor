@@ -59,6 +59,7 @@ parseAvailableTimes' :: IOSArrow XmlTree (Maybe (Time,Time))
 parseAvailableTimes' = configSysVars (withTrace 1 : [])
                        >>> css "#datepickerDirect"
                        >>> (getAttrValue "data-min" &&& getAttrValue "data-max")
+                       -- TODO: add 23:59 to end date!
                        >>> ((arr fst >>> parseDate) &&& (arr snd >>> parseDate))
                        >>> arr makeAvailableTime
   where
