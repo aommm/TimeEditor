@@ -66,7 +66,8 @@ parseAvailableTimes' = configSysVars (withTrace 1 : [])
     makeAvailableTime (a,b) = do
       a' <- a
       b' <- b
-      return (a',b')
+      let b'' = (23*3600+59*60+59) `addUTCTime` b'
+      return (a',b'')
 
 -- | Parses a date from a string formatted like "20150329"
 parseDate :: IOSArrow String (Maybe Time)

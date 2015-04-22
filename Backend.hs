@@ -144,10 +144,10 @@ createBooking sess rb = do
         nextStartTime = xWeeks `addUTCTime` thisStartTime
     putStrLn "Termination"
     -- print $ take 10 times
-    -- print eTime
-    -- print $ take 3 times
-    -- print notTooLate
-    -- print notTooSoon
+    print eTime
+    print $ take 3 times
+    print notTooLate
+    print notTooSoon
     print thisStartTime
     print nextStartTime
     -- TODO: Fix MakeBooking.hs
@@ -167,8 +167,8 @@ createBooking sess rb = do
 
 simpleRecBooking :: RecurringBooking
 simpleRecBooking = RecurringBooking {
-  rStartTime = fromJust $ parseTime defaultTimeLocale "%Y-%m-%d %H:%M" "2015-04-20 20:00",
-  rEndTime   = fromJust $ parseTime defaultTimeLocale "%Y-%m-%d %H:%M" "2015-04-20 22:00",
+  rStartTime = fromJust $ parseTime defaultTimeLocale "%Y-%m-%d %H:%M" "2015-04-22 20:00",
+  rEndTime   = fromJust $ parseTime defaultTimeLocale "%Y-%m-%d %H:%M" "2015-04-22 22:00",
   everyXWeeks = 1,
   rooms = manyRooms,
   purposes = fewPurposes,
