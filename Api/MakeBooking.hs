@@ -26,8 +26,9 @@ import qualified Data.Tree.Class as T
 import Text.HandsomeSoup
 import Control.Lens hiding (deep, none)
 -- misc
-import qualified Data.ByteString.Lazy.Char8 as C8
+import Data.ByteString.Lazy (toStrict)
 import Data.Text (pack, unpack, strip)
+import Data.ByteString.UTF8 (toString)
 import Data.Time
 import System.Locale (defaultTimeLocale)
 import Data.Maybe (fromJust)
@@ -42,7 +43,7 @@ getAvailableTimes :: S.Session -> IO (Maybe (Time,Time))
 getAvailableTimes sess = do
     let mainUrl = "https://se.timeedit.net/web/chalmers/db1/b1/r.html?h=t&sid=1002&id=-1"
     r <- S.get sess mainUrl
-    let html = C8.unpack $ r ^. responseBody
+    let html = toString $ toStrict $ r ^. responseBody
     debugSaveS "reservePage.html" html
     parseAvailableTimes html
 
@@ -112,7 +113,7 @@ getObjects sess params startIdx endIdx
   | startIdx >= endIdx = return []
   | otherwise         = do
   r <- S.getWith opts sess url
-  let html = C8.unpack $ r ^. responseBody
+  let html = toString $ toStrict $ r ^. responseBody
   -- debugSaveS ("roomsPage-"++show startIdx++".html") html
   objs     <- parseObjects html
   moreObjs <- getObjects sess params (startIdx+stepSize) endIdx

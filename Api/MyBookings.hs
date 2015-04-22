@@ -24,8 +24,8 @@ import Control.Lens hiding (deep, none)
 
 import Data.List.Split (splitOn)
 import Data.Either.Unwrap
-import qualified Data.ByteString.Lazy as BS
-import qualified Data.ByteString.Lazy.Char8 as C8
+import Data.ByteString.Lazy (toStrict)
+import Data.ByteString.UTF8 (toString)
 import Data.Time
 import System.Locale (defaultTimeLocale) -- locale needed for time
 
@@ -39,7 +39,7 @@ getBookings :: S.Session -> IO ([Booking])
 getBookings sess = do
     let mainUrl = "https://se.timeedit.net/web/chalmers/db1/b1/my.html?h=t&sid=1002&g=f"
     r2 <- S.get sess mainUrl
-    let html = C8.unpack $ r2 ^. responseBody
+    let html = toString $ toStrict $ r2 ^. responseBody
     debugSaveS "bookingsPage.html" html
     bookings <- parseBookings html
     return $ bookings
