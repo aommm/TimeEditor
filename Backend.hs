@@ -28,6 +28,7 @@ import qualified Network.Wreq.Session as S
 import Control.Monad
 import Data.Either
 import Data.Maybe (fromJust)
+import Data.List (find)
 import Data.Time
 import Data.Time.Format
 import System.Locale (defaultTimeLocale)
@@ -136,31 +137,34 @@ createBooking sess rb = do
   if (rStartTime rb > eTime)
   then return $ Right rb
   else do
+    -- Find start time
     let xWeeks = fromInteger $ 60*60*24*7*(everyXWeeks rb)
         times = iterate (addUTCTime xWeeks) (rStartTime rb)
         notTooLate = takeWhile (<= eTime) times
         notTooSoon = dropWhile (< sTime) notTooLate
         thisStartTime = head notTooSoon
         nextStartTime = xWeeks `addUTCTime` thisStartTime
-    putStrLn "Termination"
-    -- print $ take 10 times
-    print eTime
-    print $ take 3 times
-    print notTooLate
-    print notTooSoon
-    print thisStartTime
-    print nextStartTime
-    -- TODO: Fix MakeBooking.hs
-    --       Continue with rooms etc
+    -- Find room
+    availableRooms <- getAvailableRooms sess (sTime,eTime)
+    let (Just room) = findElement availableRooms (rooms rb)
+    print room
+    -- Find purpose
+    availablePurposes <- getAvailablePurposes sess
+    -- print availablePurposes
+    -- print (purposes rb)
+    let (Just purpose) = findElement availablePurposes (purposes rb)
+    print purpose
+
+
     return $ Right rb
 
   -- if (rStartTime rb) `inRange` times
   -- then undefined
   -- else undefined
-
-
-
 -- getAvailableTimes :: S.Session -> IO (Maybe (Time,Time))
+
+findElement :: Eq a => [a] -> [a] -> Maybe a
+findElement available wanted = find (`elem` available) wanted
 
 -------------------------------------------------------------------------------
 -- debugging data
@@ -177,7 +181,9 @@ simpleRecBooking = RecurringBooking {
 }
 
 manyRooms :: [Room]
-manyRooms = [("205593.186","2109"),("192376.186","3215"),("192377.186","3217"),
+manyRooms = [("192421.186","Idegr10"),
+  ("192422.186","Idegr11"),("192429.186","Idegr4"),("192430.186","Idegr5"),
+  ("205593.186","2109"),("192376.186","3215"),("192377.186","3217"),
   ("192381.186","4205"),("192382.186","4207"),("192383.186","5205"),
   ("192384.186","5207"),("192385.186","5209"),("192386.186","5211"),
   ("192387.186","5213"),("192388.186","5215"),("192389.186","5217"),
@@ -185,8 +191,7 @@ manyRooms = [("205593.186","2109"),("192376.186","3215"),("192377.186","3217"),
   ("192396.186","6211"),("192397.186","6213"),("192398.186","6215"),
   ("205247.186","F4051"),("205248.186","F4052"),("205249.186","F4053"),
   ("205250.186","F4054"),("205251.186","F4055"),("205252.186","F4056"),
-  ("205253.186","F4057"),("205254.186","F4058"),("192421.186","Idegr10"),
-  ("192422.186","Idegr11"),("192429.186","Idegr4"),("192430.186","Idegr5")];
+  ("205253.186","F4057"),("205254.186","F4058")];
 
 fewPurposes :: [Purpose]
 fewPurposes = [("203460.192","Övrigt")]
