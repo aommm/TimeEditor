@@ -28,7 +28,7 @@ import qualified Network.Wreq.Session as S
 import Control.Monad
 import Data.Either
 import Data.Maybe (fromJust)
-import Data.List (find)
+import Data.List (find, elemIndex)
 import Data.Time
 import Data.Time.Format
 import System.Locale (defaultTimeLocale)
@@ -109,9 +109,11 @@ processRecurringBookings p = S.withSession $ \sess -> do
         recBookings' = map snd bsAndRbs
     -- save changed recurring bookings
     putStrLn "save new recurring bookings..."
+    print recBookings'
     -- saveRecurringBookings p recBookings'
     -- try to place bookings
     putStrLn "place bookings..."
+    -- TODO: sort on start date
     success <- mapM (makeBooking sess) bookings
     print success
     putStrLn "done!"
@@ -130,6 +132,7 @@ createBookings sess rb = do
 
 -- Creates as many Booking objects as possible from a RecurringBooking.
 -- When no more Bookings can be created, returns only the RecurringBooking
+-- TODO: handle case when e.g. no rooms exist (don't pattern match on Just)
 createBooking :: S.Session -> RecurringBooking -> IO (Either (Booking,RecurringBooking) RecurringBooking)
 createBooking sess rb = do
   -- Assume HTTP works ok
@@ -139,32 +142,34 @@ createBooking sess rb = do
   else do
     -- Find start time
     let xWeeks = fromInteger $ 60*60*24*7*(everyXWeeks rb)
-        times = iterate (addUTCTime xWeeks) (rStartTime rb)
-        notTooLate = takeWhile (<= eTime) times
+        startTimes = iterate (addUTCTime xWeeks) (rStartTime rb)
+        notTooLate = takeWhile (<= eTime) startTimes
         notTooSoon = dropWhile (< sTime) notTooLate
         thisStartTime = head notTooSoon
         nextStartTime = xWeeks `addUTCTime` thisStartTime
+    -- find end time
+    -- TODO: store duration instead of date object for end time
+        endTimes = iterate (addUTCTime xWeeks) (rEndTime rb)
+        (Just timeIndex) = elemIndex thisStartTime startTimes
+        thisEndTime = endTimes !! timeIndex
+        nextEndTime = endTimes !! (timeIndex + 1)
     -- Find room
-    availableRooms <- getAvailableRooms sess (sTime,eTime)
+    availableRooms <- getAvailableRooms sess (thisStartTime,thisEndTime)
     let (Just room) = findElement availableRooms (rooms rb)
-    print room
     -- Find purpose
     availablePurposes <- getAvailablePurposes sess
-    -- print availablePurposes
-    -- print (purposes rb)
     let (Just purpose) = findElement availablePurposes (purposes rb)
-    print purpose
-
-
-    return $ Right rb
-
-  -- if (rStartTime rb) `inRange` times
-  -- then undefined
-  -- else undefined
--- getAvailableTimes :: S.Session -> IO (Maybe (Time,Time))
-
-findElement :: Eq a => [a] -> [a] -> Maybe a
-findElement available wanted = find (`elem` available) wanted
+    -- Create booking
+    let booking = Booking {
+                      startTime =thisStartTime
+                    , endTime = thisEndTime
+                    , room = room
+                    , purpose = purpose
+                    , privateComment = rPrivateComment rb
+                    , publicComment = rPublicComment rb
+    }
+    let rb' = rb {rStartTime = nextStartTime, rEndTime = nextEndTime}
+    return $ Left (booking, rb')
 
 -------------------------------------------------------------------------------
 -- debugging data
@@ -202,6 +207,10 @@ fewPurposes = [("203460.192","Övrigt")]
 -- Removes the element at the specified index from the list
 removeAt :: Int -> [a] -> [a]
 removeAt i l = take i l ++ drop (i+1) l
+
+-- | Steps through 'wanted', returning the first element which is also in 'available'
+findElement :: Eq a => [a] -> [a] -> Maybe a
+findElement available wanted = find (`elem` available) wanted
 
 -- | The 'concatMapM' function generalizes 'concatMap' to arbitrary monads.
 concatMapM        :: (Monad m) => (a -> m [b]) -> [a] -> m [b]

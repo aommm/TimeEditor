@@ -82,7 +82,7 @@ parseDate = arr (parseTime defaultTimeLocale "%Y%m%d")
 --   Returns at most 30 rooms.
 --   Assumes date portion of both times to be the same (since no bookings can last several days).
 getAvailableRooms :: S.Session -> (Time,Time) -> IO ([Room])
-getAvailableRooms s (start,end) = getObjects s params 0 30
+getAvailableRooms s (start,end) = getObjects s params 0 100
  where
    params = [("types","186"),("subtypes","186"), ("starttime",startTime), ("endtime",endTime),("dates",dates)]
    dates      = formatTime defaultTimeLocale "%Y%m%d-%Y%m%d" start --"20150410-20150410"
@@ -120,8 +120,8 @@ getObjects sess params startIdx endIdx
   return $ objs ++ moreObjs
   where
     stepSize   = 15 -- how many to fetch each time. only 15 appears to work
-    url        = "https://se.timeedit.net/web/chalmers/db1/b1/objects.html?max=15&fr=t&partajax=t&im=f&add=f&sid=1002&l=sv_SE&step=1&grp=5"
-    params'    = params ++ [("start",show startIdx), ("max",show stepSize)]
+    url        = "https://se.timeedit.net/web/chalmers/db1/b1/objects?fr=t&partajax=t&im=f&add=f&sid=1002&l=sv_SE&step=1&grp=5"
+    params'    = params ++ [("start",show startIdx), ("max",show stepSize), ("part","t"), ("media","html")]
     textParams = map (mapPair pack pack) params' -- Convert String->Text
     opts       = defaults { WT.params = textParams } -- Create Wreq options object
 
