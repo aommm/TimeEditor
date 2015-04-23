@@ -1,13 +1,13 @@
 {-# LANGUAGE OverloadedStrings #-}
 
--- TODO: * Write processRecurringBookings
+-- TODO: * Fixes to processRecurringBookings
 --       * Write frontend which allows for admin of RecurringBooking's
 
 module Backend (
     addRecurringBooking,
     removeRecurringBooking,
     getRecurringBookings,
-    -- processRecurringBookings,
+    processRecurringBookings,
     -- debugging
     simpleRecBooking,
     manyRooms,
@@ -27,8 +27,9 @@ import qualified Network.Wreq.Session as S
 -- Misc
 import Control.Monad
 import Data.Either
-import Data.Maybe (fromJust)
-import Data.List (find, elemIndex)
+import Data.Maybe (fromJust, catMaybes)
+import Data.List (find, elemIndex, sortBy, nubBy)
+import Data.Ord (comparing)
 import Data.Time
 import Data.Time.Format
 import System.Locale (defaultTimeLocale)
@@ -39,6 +40,7 @@ import System.IO.Strict (hGetContents)
 -- Types
 
 data RecurringBooking = RecurringBooking {
+  uid :: Int,
   rStartTime :: Time,
   rEndTime :: Time,
   everyXWeeks :: Integer,
@@ -76,6 +78,13 @@ getRecurringBookings p = do
   hClose handle
   return bs
 
+-- | Overwrites the RecurringBookings in the file with []
+clearRecurringBookings :: FilePath -> IO ()
+clearRecurringBookings p = do
+  handle <- openFile p WriteMode 
+  hPutStr handle "[]"
+  hClose handle
+
 -- | Saves a list of RecurringBooking to file.
 --   Overwrites the file, if already exists
 saveRecurringBookings :: FilePath -> [RecurringBooking] -> IO ()
@@ -87,12 +96,11 @@ saveRecurringBookings p bs = do
 -------------------------------------------------------------------------------
 -- processRecurringBookings
 
--- Process the bookings in the given file,
--- create bookings for each as long as possible
-
--- TODO: * implement createBooking
---       * save changed RecurringBookings somehow? Where?
-
+-- | Process the bookings in the given file,
+--   create bookings for each as long as possible.
+-- 
+--   If a booking is successfully made, modifies the saved RecurringBooking
+--   to target a later date.
 processRecurringBookings :: FilePath -> IO ()
 processRecurringBookings p = S.withSession $ \sess -> do
     -- login
@@ -105,40 +113,52 @@ processRecurringBookings p = S.withSession $ \sess -> do
     putStrLn $ "number of recurring bookings: "++ show (length recBookings)
     putStrLn "createBookings for each..."
     bsAndRbs <- mapM (createBookings sess) recBookings
-    let bookings     = concatMap fst bsAndRbs
-        recBookings' = map snd bsAndRbs
-    -- save changed recurring bookings
-    putStrLn "save new recurring bookings..."
-    print recBookings'
-    -- saveRecurringBookings p recBookings'
-    -- try to place bookings
-    putStrLn "place bookings..."
-    -- TODO: sort on start date
-    success <- mapM (makeBooking sess) bookings
-    print success
+    let bookings       = concat bsAndRbs
+        dateSorter     = comparing (startTime.fst)
+        sortedBookings = sortBy dateSorter bookings
+    putStrLn "place all bookings..."
+    -- will try to place booking. If it succeeds, returns recurringBooking
+    newRecBookingsMaybe <- mapM (\(b,rb) -> do
+        result <- makeBooking sess b
+        if result
+        then do
+          putStrLn $ "placed booking" -- TODO: print date/room?
+          return $ Just rb
+        else return Nothing
+      ) sortedBookings
+    let newRecBookings = catMaybes newRecBookingsMaybe
+        idEq b1 b2     = uid b1 == uid b2
+        -- keep only one recurringBooking per id, and prioritise new ones
+        -- (relies on nubBy's ordering: ``nubBy fst [(1,1),(1,2)] == [(1,1)])
+        recBookingsToSave = nubBy idEq $ reverse $ recBookings ++ newRecBookings
+    putStrLn "clearing previous recurring bookings..."
+    clearRecurringBookings p
+    putStrLn $ "saving " ++ show (length recBookingsToSave) ++ " recurring bookings..."
+    saveRecurringBookings p recBookingsToSave
     putStrLn "done!"
-    return () -- TODO: return something meaningful?
+    return ()
 
 -- | Creates as many Bookings as possible from a RecurringBooking.
---   Also returns a changed RecurringBooking
-createBookings :: S.Session -> RecurringBooking -> IO ([Booking],RecurringBooking)
+--   Returns a RecurringBooking for each, which should be saved if the booking
+--   can be successfully made.
+createBookings :: S.Session -> RecurringBooking -> IO [(Booking,RecurringBooking)]
 createBookings sess rb = do
   m <- createBooking sess rb
   case m of
-    Right rb'    -> return ([],rb')
-    Left (b,rb') -> do
-      (bs,rbs) <- createBookings sess rb'
-      return $ (b:bs, rbs)
+    Nothing    -> return []
+    Just (b,rb') -> do
+      bs <- createBookings sess rb'
+      return $ (b,rb'):bs
 
 -- Creates as many Booking objects as possible from a RecurringBooking.
--- When no more Bookings can be created, returns only the RecurringBooking
+-- When no more Bookings can be created, returns Nothing.
 -- TODO: handle case when e.g. no rooms exist (don't pattern match on Just)
-createBooking :: S.Session -> RecurringBooking -> IO (Either (Booking,RecurringBooking) RecurringBooking)
+createBooking :: S.Session -> RecurringBooking -> IO (Maybe (Booking,RecurringBooking))
 createBooking sess rb = do
   -- Assume HTTP works ok
   (Just (sTime,eTime)) <- getAvailableTimes sess
   if (rStartTime rb > eTime)
-  then return $ Right rb
+  then return $ Nothing
   else do
     -- Find start time
     let xWeeks = fromInteger $ 60*60*24*7*(everyXWeeks rb)
@@ -169,15 +189,27 @@ createBooking sess rb = do
                     , publicComment = rPublicComment rb
     }
     let rb' = rb {rStartTime = nextStartTime, rEndTime = nextEndTime}
-    return $ Left (booking, rb')
+    return $ Just (booking, rb')
 
 -------------------------------------------------------------------------------
 -- debugging data
 
 simpleRecBooking :: RecurringBooking
 simpleRecBooking = RecurringBooking {
+  uid = 0,
   rStartTime = fromJust $ parseTime defaultTimeLocale "%Y-%m-%d %H:%M" "2015-04-22 20:00",
   rEndTime   = fromJust $ parseTime defaultTimeLocale "%Y-%m-%d %H:%M" "2015-04-22 22:00",
+  everyXWeeks = 1,
+  rooms = manyRooms,
+  purposes = fewPurposes,
+  rPrivateComment = "I'm not a robot",
+  rPublicComment  = ""
+}
+distantRecBooking :: RecurringBooking
+distantRecBooking = RecurringBooking {
+  uid = 1,
+  rStartTime = fromJust $ parseTime defaultTimeLocale "%Y-%m-%d %H:%M" "2016-04-22 20:00",
+  rEndTime   = fromJust $ parseTime defaultTimeLocale "%Y-%m-%d %H:%M" "2016-04-22 22:00",
   everyXWeeks = 1,
   rooms = manyRooms,
   purposes = fewPurposes,
