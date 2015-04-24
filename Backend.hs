@@ -4,6 +4,7 @@
 --       * Write frontend which allows for admin of RecurringBooking's
 
 module Backend (
+    RecurringBooking (..),
     addRecurringBooking,
     removeRecurringBooking,
     getRecurringBookings,
@@ -40,7 +41,7 @@ import System.IO.Strict (hGetContents)
 -- Types
 
 data RecurringBooking = RecurringBooking {
-  uid :: Int,
+  rName :: String,
   rStartTime :: Time,
   rEndTime :: Time,
   everyXWeeks :: Integer,
@@ -127,7 +128,7 @@ processRecurringBookings p = S.withSession $ \sess -> do
         else return Nothing
       ) sortedBookings
     let newRecBookings = catMaybes newRecBookingsMaybe
-        idEq b1 b2     = uid b1 == uid b2
+        idEq b1 b2     = rName b1 == rName b2
         -- keep only one recurringBooking per id, and prioritise new ones
         -- (relies on nubBy's ordering: ``nubBy fst [(1,1),(1,2)] == [(1,1)])
         recBookingsToSave = nubBy idEq $ reverse $ recBookings ++ newRecBookings
@@ -196,7 +197,7 @@ createBooking sess rb = do
 
 simpleRecBooking :: RecurringBooking
 simpleRecBooking = RecurringBooking {
-  uid = 0,
+  rName = "simple",
   rStartTime = fromJust $ parseTime defaultTimeLocale "%Y-%m-%d %H:%M" "2015-04-22 20:00",
   rEndTime   = fromJust $ parseTime defaultTimeLocale "%Y-%m-%d %H:%M" "2015-04-22 22:00",
   everyXWeeks = 1,
@@ -207,7 +208,7 @@ simpleRecBooking = RecurringBooking {
 }
 distantRecBooking :: RecurringBooking
 distantRecBooking = RecurringBooking {
-  uid = 1,
+  rName = "distant",
   rStartTime = fromJust $ parseTime defaultTimeLocale "%Y-%m-%d %H:%M" "2016-04-22 20:00",
   rEndTime   = fromJust $ parseTime defaultTimeLocale "%Y-%m-%d %H:%M" "2016-04-22 22:00",
   everyXWeeks = 1,
