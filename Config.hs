@@ -121,10 +121,56 @@ modifyBookingMenu rbs i = do
   putStrLn "\nModifying booking"
   putStrLn "-------------------"
 
--- TODO
+
+-------------------------------------------------------------------------------
+-- Add bookings
+
+-- TODO: initiate a session somehow
+
+
+-- TODO: cache available rooms/purposes
+getRooms = do
+  creds <- parseCredentials "credentials"
+  login sess creds
+  (t1,t2) <- getLatestTimes
+  putStrLn $ "available times:" ++ show (t1,t2)
+  rooms <- getAvailableRooms sess (t1,t2)
+
+getPurposes = do
+  -- TODO: needs times?
+  creds <- parseCredentials "credentials"
+  login sess creds
+  purposes <- getAvailablePurposes sess
+
+getCachedRooms = undefined
+getCachedPurposes = undefined
+
+
+-- Reads latest possible times to make a booking at
+getLatestTimes sess = do
+  times <- getAvailableTimes sess
+  let (_,t2)  = fromJust times
+      oneHour = 3600
+      t1 = addUTCTime (-oneHour) t2
+  return (t1,t2)
+
+
+-- TODO implement
 addBookingMenu = do
   putStrLn "\nAdding booking"
-  putStrLn "-----------------"
+  putStrLn "--------------"
+  allRooms <- getRooms
+  allPurposes <- getPurposes
+  -- TODO: allow user to enter several rooms/purposes?
+  putStrLn $ "available rooms:"++show allRooms
+  putStrLn $ "available purposes:"++show allPurposes
+  
+  -- TODO: create RB here
+  -- let b = Booking {startTime = t1, endTime = t2, room = head allRooms,
+  --                  purpose = head allPurposes, publicComment="I am an ordinary citizen; stroll",
+  --                  privateComment="I am a robot" }
+  
+  return ()
 
 -------------------------------------------------------------------------------
 -- Util
