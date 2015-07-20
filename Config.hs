@@ -18,6 +18,7 @@ import qualified Network.Wreq.Session as S
 import Data.Time
 import Data.Char (toLower)
 import Data.Maybe (fromJust)
+import System.IO (hFlush, stdout)
 
 import Text.Read (readMaybe)
 
@@ -49,6 +50,7 @@ mainMenu = do
 
 mainMenu' = do
   putStr "Enter what you want to do: "
+  hFlush stdout
   opt <- getLine
   case toLowerCase opt of
     "1" -> do
@@ -72,6 +74,7 @@ bookingsMenu = do
 
 bookingsMenu' rbs = do
   putStr "\nEnter any number to view that booking, or E to go back: "
+  hFlush stdout
   opt <- getLine
   case toLowerCase opt of
     "e" ->
@@ -101,6 +104,7 @@ bookingMenu rbs i = do
 
 bookingMenu' rbs i = do
     putStr   "\nwhat do you want to do? "
+    hFlush stdout
     opt <- getLine
     case toLowerCase opt of
       "1" -> do
