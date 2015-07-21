@@ -48,8 +48,10 @@ type Program = ReaderT Data IO
 --       --config, --clear, --add, --remove --list
 
 
-path :: String
+path, dataPath :: FilePath
 path = "bookings.dat"
+dataPath = "data.dat"
+credentialsPath = "credentials"
 
 main :: IO ()
 main = do
@@ -164,48 +166,25 @@ addBookingMenu = do
 -------------------------------------------------------------------------------
 -- Init
 
-
--- TODO: cache available rooms/purposes
-{-
-getRooms = do
-  creds <- parseCredentials "credentials"
-  login sess creds
-  (t1,t2) <- getLatestTimes
-  putStrLn' $ "available times:" ++ show (t1,t2)
-  rooms <- getAvailableRooms sess (t1,t2)
-
-getPurposes = do
-  -- TODO: needs times?
-  creds <- parseCredentials "credentials"
-  login sess creds
-  purposes <- getAvailablePurposes sess
-
-getCachedRooms = undefined
-getCachedPurposes = undefined
-
--- Reads latest possible times to make a booking at
-getLatestTimes sess = do
-  times <- getAvailableTimes sess
-  let (_,t2)  = fromJust times
-      oneHour = 3600
-      t1 = addUTCTime (-oneHour) t2
-  return (t1,t2)
-
--}
-
-
 -- | Gets the cached state from file,
 --   or downloads it if it doesn't exist
--- TODO
 initData :: IO Data
 initData = do
-  return emptyData
+  putStrLn "initData"
+  mData <- getCachedData -- See if cached data exists
+  case mData of
+    Just data' -> return data' -- If so, return cached data
+    Nothing    -> do           -- If not, download data and put in cache
+      data' <- getOnlineData
+      saveCachedData data'
+      return data'
 
-
--- | Gets the cached state from file
-getData :: FilePath -> IO (Maybe Data)
-getData p = do
-  handle <- openFile p ReadMode
+-- | Gets the cached data from file
+-- TODO: fix so that "data.dat" is created when it does not exist
+getCachedData :: IO (Maybe Data)
+getCachedData = do
+  putStrLn "getCachedData"
+  handle <- openFile dataPath ReadMode
   s <- hGetContents handle
   let bs  = if null s
             then Nothing
@@ -213,9 +192,40 @@ getData p = do
   hClose handle
   return bs
 
+-- | Saves data to file
+-- TODO: fix so that "data.dat" is created when it does not exist
+saveCachedData :: Data -> IO ()
+saveCachedData data' = do
+  putStrLn "saveCachedData"
+  handle <- openFile dataPath WriteMode 
+  hPutStr handle (show data')
+  hClose handle
+
+-- Calculates latest possible times to make a booking at
+getLatestTimes :: S.Session -> IO (Time,Time)
+getLatestTimes sess = do
+  times <- getAvailableTimes sess
+  let (_,t2)  = fromJust times
+      oneHour = 3600
+      t1 = addUTCTime (-oneHour) t2
+  return (t1,t2)
+
+-- | Downloads data from the net and returns it
+getOnlineData :: IO Data
+getOnlineData = S.withSession $ \sess -> do
+  putStrLn "getOnlineData"
+  creds <- parseCredentials credentialsPath
+  login sess creds
+  t <- getLatestTimes sess
+  newRooms    <- getAvailableRooms sess t
+  newPurposes <- getAvailablePurposes sess
+  return Data {
+    rooms    = newRooms,
+    purposes = newPurposes
+  }
 
 -------------------------------------------------------------------------------
--- Util
+-- Program commands
 
 putStr' :: String -> Program ()
 putStr' s = liftIO $ do
@@ -232,6 +242,9 @@ askAgain :: Program a -> Program a
 askAgain p = do
   putStrLn' "I didn't quite grasp that. Please try again."
   p
+
+-------------------------------------------------------------------------------
+-- Util
 
 rbToString :: B.RecurringBooking -> String
 rbToString rb = B.rName rb++" (next time "++show (B.rStartTime rb)

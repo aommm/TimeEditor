@@ -1,11 +1,5 @@
 import Control.Monad.Reader
 
-data State = State {
-	rooms    :: String,
-	purposes :: String
-}
-
-type Program = ReaderT State IO ()
 
 myProgram :: Program 
 myProgram = do
