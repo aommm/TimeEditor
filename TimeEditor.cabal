@@ -22,6 +22,7 @@ library
   -- other-modules:       
   -- other-extensions:    ConstraintKinds, TypeFamilies, MultiParamTypeClasses, FlexibleContexts, FlexibleInstances, GADTs, DeriveDataTypeable, ScopedTypeVariables, StandaloneDeriving, UndecidableInstances, KindSignatures, QuasiQuotes, RecursiveDo, Rank2Types, BangPatterns, GeneralizedNewtypeDeriving
   build-depends:       base >=4.7 && <4.8,
+                       mtl >= 2.2.1 && < 2.2.2,
                        bytestring >= 0.10 && < 0.11,
                        split >= 0.2 && <0.3,
                        either-unwrap >= 1.1 && < 1.2,
@@ -47,6 +48,7 @@ executable TimeEditorCli
   -- other-modules:       
   -- other-extensions:    
   build-depends:       base >=4.7 && <4.8,
+                       mtl >= 2.2.1 && < 2.2.2,
                        bytestring >= 0.10 && < 0.11,
                        split >= 0.2 && <0.3,
                        either-unwrap >= 1.1 && < 1.2,
@@ -71,6 +73,7 @@ executable TimeEditorConfig
   -- other-extensions:    
   build-depends:       TimeEditor,
                        base >=4.7 && <4.8,
+                       mtl >= 2.2.1 && < 2.2.2,
                        bytestring >= 0.10 && < 0.11,
                        split >= 0.2 && <0.3,
                        either-unwrap >= 1.1 && < 1.2,
